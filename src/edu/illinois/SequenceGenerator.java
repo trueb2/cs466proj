@@ -3,6 +3,7 @@ package edu.illinois;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by jwtrueb on 10/21/16.
@@ -32,9 +33,18 @@ public class SequenceGenerator {
      * @param sl, Sequence Length
      * @return generateSequences
      */
-    static ArrayList<String> generateRandomSequences(int sc, int sl) {
-        //TODO: IMPLEMENT THIS
-        return null;
+    public static ArrayList<String> generateRandomSequences(int sc, int sl) {
+        ArrayList<String> randomSequences = new ArrayList<>(sc);
+        Random r = new Random(System.currentTimeMillis());
+        String[] bases = { "A", "C", "G", "T" };
+        for(int i = 0; i < sc; i++) {
+            StringBuilder sequence = new StringBuilder(sl);
+            for(int j = 0; j < sl; j++) {
+                sequence.append(bases[r.nextInt(4)]);
+            }
+            randomSequences.add(sequence.toString());
+        }
+        return randomSequences;
     }
 
     /**
