@@ -16,7 +16,12 @@ public class SequenceGeneratorTest {
         assertEquals(2,sequences.size());
         assertEquals(10,sequences.get(0).length());
         assertEquals(10,sequences.get(1).length());
+    }
 
+    @org.junit.Test
+    public void generateRandomMotif1() throws Exception {
+        String motif = generateRandomMotif(1, 10);
+        assertEquals(10,motif.length());
     }
 
 }

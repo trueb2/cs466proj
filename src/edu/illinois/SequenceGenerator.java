@@ -35,14 +35,8 @@ public class SequenceGenerator {
      */
     public static ArrayList<String> generateRandomSequences(int sc, int sl) {
         ArrayList<String> randomSequences = new ArrayList<>(sc);
-        Random r = new Random(System.currentTimeMillis());
-        String[] bases = { "A", "C", "G", "T" };
         for(int i = 0; i < sc; i++) {
-            StringBuilder sequence = new StringBuilder(sl);
-            for(int j = 0; j < sl; j++) {
-                sequence.append(bases[r.nextInt(4)]);
-            }
-            randomSequences.add(sequence.toString());
+            randomSequences.add(Utils.randomBases(sl));
         }
         return randomSequences;
     }
@@ -55,9 +49,9 @@ public class SequenceGenerator {
      * @param ml, Motif Length
      * @return motif
      */
-    static String generateRandomMotif(double icpc, int ml) {
+    public static String generateRandomMotif(double icpc, int ml) {
         //TODO: IMPLEMENT THIS
-        return null;
+        return Utils.randomBases(ml);
     }
 
     /**
