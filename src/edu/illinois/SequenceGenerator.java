@@ -15,14 +15,14 @@ public class SequenceGenerator {
                                String sitesFileName,
                                String motifFileName,
                                String motifLengthFileName) {
-        ArrayList<String> sequences = SequenceGenerator.generateRandomSequences(sc, sl);
-        String motif = SequenceGenerator.generateRandomMotif(icpc, ml);
-        ArrayList<String> bindingSites = SequenceGenerator.generateBindingSites(sc, motif);
-        ArrayList<Pair<String,Integer>> plantedSequences = SequenceGenerator.plantMotifInSequences(bindingSites, sequences);
-        SequenceGenerator.writeFasta(Utils.getSequenceFromPair(plantedSequences), fastaFileName);
-        SequenceGenerator.writeSites(Utils.getSiteFromPair(plantedSequences), sitesFileName);
-        SequenceGenerator.writeMotif(motif, motifFileName);
-        SequenceGenerator.writeMotifLength(ml, motifLengthFileName);
+        ArrayList<String> sequences = generateRandomSequences(sc, sl);
+        String motif = generateRandomMotif(icpc, ml);
+        ArrayList<String> bindingSites = generateBindingSites(sc, motif);
+        ArrayList<Pair<String,Integer>> plantedSequences = plantMotifInSequences(bindingSites, sequences);
+        writeFasta(Utils.getSequenceFromPair(plantedSequences), fastaFileName);
+        writeSites(Utils.getSiteFromPair(plantedSequences), sitesFileName);
+        writeMotif(motif, motifFileName);
+        writeMotifLength(ml, motifLengthFileName);
     }
 
     /**
@@ -60,7 +60,7 @@ public class SequenceGenerator {
      * @param motif
      * @return bindingSites
      */
-    static ArrayList<String> generateBindingSites(int sc, String motif) {
+    public static ArrayList<String> generateBindingSites(int sc, String motif) {
         //TODO: IMPLEMENT THIS
         return null;
     }
@@ -72,7 +72,7 @@ public class SequenceGenerator {
      * @param sequences
      * @return plantedSequences, list of pairs of the planted sequence and location of plant
      */
-    static ArrayList<Pair<String,Integer>> plantMotifInSequences(ArrayList<String> sites, ArrayList<String> sequences) {
+    public static ArrayList<Pair<String,Integer>> plantMotifInSequences(ArrayList<String> sites, ArrayList<String> sequences) {
         //TODO: IMPLEMENT THIS
         return null;
     }
@@ -83,7 +83,7 @@ public class SequenceGenerator {
      * @param filename
      * @return success of writing to file
      */
-    static boolean writeFasta(ArrayList<String> sequences, String filename) {
+    public static boolean writeFasta(ArrayList<String> sequences, String filename) {
         //TODO: IMPLEMENT THIS
         return false;
     }
@@ -103,7 +103,7 @@ public class SequenceGenerator {
      * @param motif
      * @param filename
      */
-    static void writeMotif(String motif, String filename) {
+    public static void writeMotif(String motif, String filename) {
     }
 
     /**
@@ -111,7 +111,7 @@ public class SequenceGenerator {
      * @param ml
      * @param filename
      */
-    static void writeMotifLength(int ml, String filename) {
+    public static void writeMotifLength(int ml, String filename) {
         //TODO: IMPLEMENT THIS
     }
 }
