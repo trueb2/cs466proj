@@ -61,7 +61,35 @@ public class SequenceGenerator {
      * @return bindingSites
      */
     public static ArrayList<Integer> generateBindingSites(ArrayList<String> sequences, String motif) {
-        return Utils.randomBindingSites(sequences.get(0).length(), motif.length());
+        int sl = sequences.get(0).length();
+        int ml = motif.length();
+        double px = .25 * .25 * .25 * .25;
+        ArrayList<Integer> bindingSites = Utils.randomBindingSites(sl, ml);
+
+        //for each sequence z there is a random binding site already chosen
+        //calculate a candidate site proportional to qx/px to replace that site
+        for(int i = 0; i < bindingSites.size(); i++) {
+            String sequence = sequences.get(i);
+            int site = bindingSites.get(i);
+            double[][] pwm = Utils.calculatePWM(sequences, i);
+            ArrayList<Double> score = new ArrayList<>();
+            for(int j = 0; j < sl - ml; j++) {
+                double qx = 1;
+                for(int k = 0; k < ml; k++) {
+                    int motifIdx = site+k;
+                    char base = sequence.charAt(motifIdx);
+                    int baseIdx = Utils.indexOfBase(base);
+                    qx *= pwm[baseIdx][motifIdx];
+                }
+                score.add(qx/px);
+            }
+
+            //Use the scores as a weighted distribution and choose one of them to be the new site
+            int newSite = Utils.weightedRandomIndex(score);
+            bindingSites.set(i, newSite);
+        }
+
+        return bindingSites;
     }
 
     /**

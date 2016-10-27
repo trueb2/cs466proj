@@ -44,4 +44,54 @@ public class Utils {
         IntStream.range(0,l).forEach((x) -> bindingSites.add(r.nextInt(l)));
         return bindingSites;
     }
+
+    static double[][] calculatePWM(ArrayList<String> sequences, int ignoredSequence) {
+        int sc = sequences.size();
+        int sl = sequences.get(0).length();
+        double[][] pwm = new double[4][sl];
+
+        //count the number of occurrences
+        for(int i = 0; i < sc; i++) {
+            if(i == ignoredSequence)
+                continue;
+            String sequence = sequences.get(i);
+            for(int j = 0; j < sl; j++) {
+                int baseIndex = indexOfBase(sequence.charAt(j));
+                pwm[baseIndex][j] = pwm[baseIndex][j] + 1;
+            }
+        }
+
+        //divide by the number of sequences that were used
+        double s = sc - 1;
+        for(int i = 0; i < 4; i++) {
+            for(int j = 0; j < sl; j++) {
+                pwm[i][j] = pwm[i][j] / s;
+            }
+        }
+
+        return pwm;
+    }
+
+    static int weightedRandomIndex(ArrayList<Double> weights) {
+        double total = weights.stream().reduce(Double::sum).get();
+        double random = Math.random() * total;
+        for(int i = 0; i < weights.size(); i++) {
+            random -= weights.get(i);
+            if(random < 0.0)
+                return i;
+        }
+        return weights.size() - 1;
+    }
+
+    static int indexOfBase(char base) {
+        switch(base) {
+            case 'A': return 0;
+            case 'C': return 1;
+            case 'G': return 2;
+            case 'T': return 3;
+            default:
+                System.out.println("Unknown Base");
+                return -1;
+        }
+    }
 }
