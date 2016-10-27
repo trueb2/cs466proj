@@ -17,7 +17,7 @@ public class SequenceGenerator {
                                String motifLengthFileName) {
         ArrayList<String> sequences = generateRandomSequences(sc, sl);
         String motif = generateRandomMotif(icpc, ml);
-        ArrayList<String> bindingSites = generateBindingSites(sc, motif);
+        ArrayList<Integer> bindingSites = generateBindingSites(sequences, motif);
         ArrayList<Pair<String,Integer>> plantedSequences = plantMotifInSequences(bindingSites, sequences);
         writeFasta(Utils.getSequenceFromPair(plantedSequences), fastaFileName);
         writeSites(Utils.getSiteFromPair(plantedSequences), sitesFileName);
@@ -55,14 +55,14 @@ public class SequenceGenerator {
     }
 
     /**
-     * Generate Sequence Count binding sites by sampling from the given motif
-     * @param sc, Sequence Count
-     * @param motif
+     * Generate binding sites that maximize the information content of the
+     * resulting PWM of the sequences
+     * @param sequences, Sequence on which to calculate the binding sites
+     * @param motif, the motif that we will plant
      * @return bindingSites
      */
-    public static ArrayList<String> generateBindingSites(int sc, String motif) {
-        //TODO: IMPLEMENT THIS
-        return null;
+    public static ArrayList<Integer> generateBindingSites(ArrayList<String> sequences, String motif) {
+        return Utils.randomBindingSites(sequences.size(), motif.length());
     }
 
     /**
@@ -72,7 +72,7 @@ public class SequenceGenerator {
      * @param sequences
      * @return plantedSequences, list of pairs of the planted sequence and location of plant
      */
-    public static ArrayList<Pair<String,Integer>> plantMotifInSequences(ArrayList<String> sites, ArrayList<String> sequences) {
+    public static ArrayList<Pair<String,Integer>> plantMotifInSequences(ArrayList<Integer> sites, ArrayList<String> sequences) {
         //TODO: IMPLEMENT THIS
         return null;
     }

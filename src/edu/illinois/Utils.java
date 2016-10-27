@@ -5,6 +5,7 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by jwtrueb on 10/21/16.
@@ -34,5 +35,13 @@ public class Utils {
         }
         return sequence.toString();
 
+    }
+
+    static ArrayList<Integer> randomBindingSites(int sc, int ml) {
+        Random r = new Random();
+        int l = sc - ml;
+        ArrayList<Integer> bindingSites = new ArrayList<>(sc);
+        IntStream.range(0,l).forEach((x) -> bindingSites.add(r.nextInt(l)));
+        return bindingSites;
     }
 }

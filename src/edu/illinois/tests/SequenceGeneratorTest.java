@@ -23,5 +23,4 @@ public class SequenceGeneratorTest {
         String motif = generateRandomMotif(1, 10);
         assertEquals(10, motif.length());
     }
-
 }
