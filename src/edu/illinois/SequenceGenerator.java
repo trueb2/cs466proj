@@ -3,7 +3,6 @@ package edu.illinois;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Created by jwtrueb on 10/21/16.
@@ -16,7 +15,7 @@ public class SequenceGenerator {
                                String motifFileName,
                                String motifLengthFileName) {
         ArrayList<String> sequences = generateRandomSequences(sc, sl);
-        String motif = generateRandomMotif(icpc, ml);
+        String motif = generateMotif(icpc, ml);
         ArrayList<Integer> bindingSites = generateBindingSites(sequences, motif);
         ArrayList<Pair<String,Integer>> plantedSequences = plantMotifInSequences(bindingSites, sequences);
         writeFasta(Utils.getSequenceFromPair(plantedSequences), fastaFileName);
@@ -49,7 +48,7 @@ public class SequenceGenerator {
      * @param ml, Motif Length
      * @return motif
      */
-    public static String generateRandomMotif(double icpc, int ml) {
+    public static String generateMotif(double icpc, int ml) {
         //TODO: IMPLEMENT THIS
         return Utils.randomBases(ml);
     }
@@ -62,7 +61,7 @@ public class SequenceGenerator {
      * @return bindingSites
      */
     public static ArrayList<Integer> generateBindingSites(ArrayList<String> sequences, String motif) {
-        return Utils.randomBindingSites(sequences.size(), motif.length());
+        return Utils.randomBindingSites(sequences.get(0).length(), motif.length());
     }
 
     /**
