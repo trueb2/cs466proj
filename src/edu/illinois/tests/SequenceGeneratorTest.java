@@ -21,18 +21,18 @@ public class SequenceGeneratorTest {
         assertEquals(10,sequences.get(1).length());
     }
 
-    @Test
-    public void generateRandomMotif1() {
-        String motif = generateMotif(1, 10);
-        assertEquals(10, motif.length());
-    }
-
-    @Test
-    public void generateBindingSites1() {
-        ArrayList<String> sequences = generateRandomSequences(10,20);
-        String motif = generateMotif(1,4);
-        ArrayList<Integer> bindingSites = generateBindingSites(sequences,motif);
-        assertTrue(bindingSites.stream().max(Integer::max).get() < 16);
-        assertTrue(bindingSites.stream().min(Integer::min).get() >= 0);
-    }
+//    @Test
+//    public void generateRandomMotif1() {
+//        String motif = generateMotif(1, 10);
+//        assertEquals(10, motif.length());
+//    }
+//
+//    @Test
+//    public void generateBindingSites1() {
+//        ArrayList<String> sequences = generateRandomSequences(10,20);
+//        String motif = generateMotif(1,4);
+//        ArrayList<Integer> bindingSites = generateBindingSites(sequences,motif);
+//        assertTrue(bindingSites.stream().max(Integer::max).get() < 16);
+//        assertTrue(bindingSites.stream().min(Integer::min).get() >= 0);
+//    }
 }
