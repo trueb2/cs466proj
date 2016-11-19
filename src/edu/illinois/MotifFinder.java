@@ -17,11 +17,11 @@ public class MotifFinder {
                 // calculate P
                     // 1. Use background PWM
                     // 2. get P
-                // Q/P is biggest then record it
+                // Q/P is largest then record it
 
-            // replace the choosen motif sites of chosSq by the biggest one
-    //print out all possible sites for each sequence
-    // print out motif weighted array
+            // replace the choosen motif sites of chosSq by the largest one
+    // print out all sites recorded for each sequence
+    // print out motif weighted array by choosen sites
 
 
 }
