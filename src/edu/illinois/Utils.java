@@ -3,6 +3,7 @@ package edu.illinois;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -13,14 +14,14 @@ import java.util.stream.IntStream;
 public class Utils {
     static final String[] BASES = { "A", "C", "G", "T" };
 
-    static ArrayList<String> getSequenceFromPair(ArrayList<Pair<String, Integer>> sequences) {
+    static List<String> getSequenceFromPair(List<Pair<String, Integer>> sequences) {
         return sequences
                 .stream()
                 .map(x -> x.getKey())
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    static ArrayList<Integer> getSiteFromPair(ArrayList<Pair<String, Integer>> sequences) {
+    static ArrayList<Integer> getSiteFromPair(List<Pair<String, Integer>> sequences) {
         return sequences
                 .stream()
                 .map(x -> x.getValue())

@@ -2,7 +2,10 @@ package edu.illinois;
 
 import javafx.util.Pair;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -15,10 +18,10 @@ public class SequenceGenerator {
                                String sitesFileName,
                                String motifFileName,
                                String motifLengthFileName) {
-        ArrayList<String> sequences = generateRandomSequences(sc, sl);
+        List<String> sequences = generateRandomSequences(sc, sl);
         WeightMatrix motif = generateMotif(icpc, ml);
-        ArrayList<Integer> bindingSites = generateBindingSites(sequences, motif);
-        ArrayList<Pair<String,Integer>> plantedSequences = plantMotifInSequences(bindingSites, sequences);
+        List<String> bindingSites = generateBindingSites(sc, motif);
+        List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(bindingSites, sequences);
         writeFasta(Utils.getSequenceFromPair(plantedSequences), fastaFileName);
         writeSites(Utils.getSiteFromPair(plantedSequences), sitesFileName);
         writeMotif(motif, motifFileName);
@@ -33,8 +36,8 @@ public class SequenceGenerator {
      * @param sl, Sequence Length
      * @return generateSequences
      */
-    public static ArrayList<String> generateRandomSequences(int sc, int sl) {
-        ArrayList<String> randomSequences = new ArrayList<>(sc);
+    public static List<String> generateRandomSequences(int sc, int sl) {
+        List<String> randomSequences = new ArrayList<>(sc);
         IntStream.range(0,sc).forEach(i -> Utils.randomBases(sl));
         return randomSequences;
     }
@@ -52,15 +55,12 @@ public class SequenceGenerator {
     }
 
     /**
-     * Generate binding sites that maximize the information content of the
-     * resulting PWM of the sequences
-     * @param sequences, Sequence on which to calculate the binding sites
+     * Generate Strings to plant using the weights in the motif
      * @param motif, the motif that we will plant
      * @return bindingSites
      */
-    public static ArrayList<Integer> generateBindingSites(ArrayList<String> sequences, WeightMatrix motif) {
-        //TODO: IMPLEMENT THIS
-        return null;
+    public static List<String> generateBindingSites(int sc, WeightMatrix motif) {
+        return IntStream.range(0,sc).mapToObj(i -> motif.sample()).collect(Collectors.toList());
     }
 
     /**
@@ -70,7 +70,7 @@ public class SequenceGenerator {
      * @param sequences
      * @return plantedSequences, list of pairs of the planted sequence and location of plant
      */
-    public static ArrayList<Pair<String,Integer>> plantMotifInSequences(ArrayList<Integer> sites, ArrayList<String> sequences) {
+    public static List<Pair<String,Integer>> plantMotifInSequences(List<String> sites, List<String> sequences) {
         //TODO: IMPLEMENT THIS
         return null;
     }
@@ -81,7 +81,7 @@ public class SequenceGenerator {
      * @param filename
      * @return success of writing to file
      */
-    public static boolean writeFasta(ArrayList<String> sequences, String filename) {
+    public static boolean writeFasta(List<String> sequences, String filename) {
         //TODO: IMPLEMENT THIS
         return false;
     }
@@ -91,7 +91,7 @@ public class SequenceGenerator {
      * @param sites
      * @param filename
      */
-    static void writeSites(ArrayList<Integer> sites, String filename) {
+    static void writeSites(List<Integer> sites, String filename) {
         //TODO: IMPLEMENT THIS
     }
 

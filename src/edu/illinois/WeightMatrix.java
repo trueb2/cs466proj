@@ -11,10 +11,13 @@ import static java.util.stream.IntStream.*;
  * Created by jwtrueb on 11/18/16.
  */
 public class WeightMatrix {
+    private static final String[] ACGT = { "A", "C", "G", "T" };
+    private int ml;
     private int[][] countMatrix;
     private int countSum = 1000000;
 
     public WeightMatrix(double icpc, int ml) {
+        this.ml = ml;
         initCountMatrix(ml);
         range(0,ml).parallel().forEach(i -> {
             stochasticGradientDescent(icpc, i);
@@ -102,6 +105,24 @@ public class WeightMatrix {
         int initCount = countSum / 4;
         range(0,ml).parallel().forEach(i ->
                 range(0, 4).forEach(j -> countMatrix[i][j] = initCount));
+    }
+
+    /**
+     * Use the weights to randomly select a base ml times to form a sampled motif
+     * @return motif, String
+     */
+    public String sample() {
+        Random r = new Random();
+        StringBuilder stringBuilder = new StringBuilder();
+        range(0,ml).forEach(i -> {
+            int randomWeight = r.nextInt(countSum);
+            int j = -1, k = 0;
+            do {
+                k += countMatrix[i][++j];
+            } while(k < randomWeight);
+            stringBuilder.append(ACGT[j]);
+        });
+        return stringBuilder.toString();
     }
 
     @Override

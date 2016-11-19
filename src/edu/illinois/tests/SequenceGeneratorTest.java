@@ -3,6 +3,7 @@ package edu.illinois.tests;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static edu.illinois.SequenceGenerator.*;
 import static org.junit.Assert.assertEquals;
@@ -15,7 +16,7 @@ public class SequenceGeneratorTest {
 
     @Test
     public void generateRandomSequences1() {
-        ArrayList<String> sequences = generateRandomSequences(2,10);
+        List<String> sequences = generateRandomSequences(2,10);
         assertEquals(2,sequences.size());
         assertEquals(10,sequences.get(0).length());
         assertEquals(10,sequences.get(1).length());
