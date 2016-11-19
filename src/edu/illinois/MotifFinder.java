@@ -4,7 +4,7 @@ package edu.illinois;
  * Created by jwtrueb on 11/18/16.
  */
 public class MotifFinder {
-
+    // TODO
     // Load all sequences from *.fa
     // Load length of Motif from size.txt
     // randomly choose motif sites for each sequences
