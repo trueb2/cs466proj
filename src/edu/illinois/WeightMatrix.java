@@ -55,6 +55,7 @@ public class WeightMatrix {
                 if (decIdx == -1) {
                     prevStep = step;
                     step = prevStep / 2;
+                    decIdx = incIdx;
                 } else {
                     row[incIdx] += step;
                     row[decIdx] -= step;
@@ -63,8 +64,10 @@ public class WeightMatrix {
             }
             prevStep = step;
             step = prevStep / 2;
-            row[incIdx] -= prevStep;
-            row[decIdx] += prevStep;
+            if(ic > icpc) {
+                row[incIdx] -= step;
+                row[decIdx] += step;
+            }
             ic = calcInformationContent(row);
         }
         countMatrix[idx] = row;
@@ -75,7 +78,7 @@ public class WeightMatrix {
         for(int i = 0; i < row.length; i++) {
             if(ti == i)
                 continue;
-            if(row[i] - step > 0)
+            if(row[i] - step >= 0)
                 acceptableIndices.add(i);
         }
 
@@ -89,7 +92,12 @@ public class WeightMatrix {
         double sum = (double) countSum;
         double log_2 = Math.log(2);
         DoubleStream probabilities = Arrays.stream(counts).mapToDouble(i -> ((double)i)/sum);
-        return probabilities.map(p -> p * (Math.log(p/.25)/log_2)).sum();
+        return probabilities.map(p -> {
+            if(p == 0)
+                return 0;
+            else
+                return p * (Math.log(p/.25)/log_2);
+        }).sum();
     }
 
 

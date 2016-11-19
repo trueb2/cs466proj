@@ -22,7 +22,11 @@ public class WeightMatrixTest {
 
     @Test
     public void stochasticGradientDescentTest() {
-        WeightMatrix wm = new WeightMatrix(1.5, 10);
+        WeightMatrix wm = new WeightMatrix(1, 10);
+        System.out.println(wm);
+        wm = new WeightMatrix(1.5, 10);
+        System.out.println(wm);
+        wm = new WeightMatrix(2, 10);
         System.out.println(wm);
     }
 
