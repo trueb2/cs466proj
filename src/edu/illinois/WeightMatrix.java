@@ -2,25 +2,21 @@ package edu.illinois;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+
+import static java.util.stream.IntStream.*;
 
 /**
  * Created by jwtrueb on 11/18/16.
  */
 public class WeightMatrix {
-    public static final int[] ACGT = {0, 1 , 2, 3};
-    int[][] countMatrix;
-    double[][] logProbMatrix;
-    int countSum = 1000000;
+    private int[][] countMatrix;
+    private int countSum = 1000000;
 
     public WeightMatrix(double icpc, int ml) {
         initCountMatrix(ml);
-        IntStream.range(0,ml).parallel().forEach(i -> {
+        range(0,ml).parallel().forEach(i -> {
             stochasticGradientDescent(icpc, i);
         });
     }
@@ -36,10 +32,10 @@ public class WeightMatrix {
      *     surpassed through taking a step of size 1. If a step of size
      *     greater than 1 surpasses the threshold, then the
      *     epoch will be undone.
-     * @param icpc
-     * @param idx
+     * @param icpc, information content per column
+     * @param idx, row index of motif to perform work on
      */
-    public void stochasticGradientDescent(double icpc, int idx) {
+    private void stochasticGradientDescent(double icpc, int idx) {
         int prevStep = countSum / 4 / 1000;
         int step = prevStep > 0 ? prevStep : 5;
         Random r = new Random();
@@ -104,11 +100,8 @@ public class WeightMatrix {
     public void initCountMatrix(int ml) {
         countMatrix = new int[ml][4];
         int initCount = countSum / 4;
-        IntStream.range(0,ml).parallel().forEach(i -> {
-            IntStream.range(0,4).forEach(j -> {
-                countMatrix[i][j] = initCount;
-            });
-        });
+        range(0,ml).parallel().forEach(i ->
+                range(0, 4).forEach(j -> countMatrix[i][j] = initCount));
     }
 
     @Override
