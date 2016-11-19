@@ -11,13 +11,14 @@ public class MotifFinder {
     // recursive doing gibbs sampling
         // randomly choose one sequence chosSq
             // recursively go through every subseq in chosSq
-                // calculate Q in
+                // calculate Q
                     // 1. gen PWM all choosen sites except chosSq
                     // 2. get Q
                 // calculate P
-                    // 1. Use background PWM all
+                    // 1. Use background PWM
                     // 2. get P
                 // Q/P is biggest then record it
+
             // replace the choosen motif sites of chosSq by the biggest one
     //print out all possible sites for each sequence
     // print out motif weighted array
