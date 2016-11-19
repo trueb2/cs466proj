@@ -5,8 +5,11 @@ import javafx.util.Pair;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static java.util.stream.IntStream.range;
 
 /**
  * Created by jwtrueb on 10/21/16.
@@ -21,7 +24,7 @@ public class SequenceGenerator {
         List<String> sequences = generateRandomSequences(sc, sl);
         WeightMatrix motif = generateMotif(icpc, ml);
         List<String> bindingSites = generateBindingSites(sc, motif);
-        List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(bindingSites, sequences);
+        List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(sc, ml, bindingSites, sequences);
         writeFasta(Utils.getSequenceFromPair(plantedSequences), fastaFileName);
         writeSites(Utils.getSiteFromPair(plantedSequences), sitesFileName);
         writeMotif(motif, motifFileName);
@@ -38,7 +41,7 @@ public class SequenceGenerator {
      */
     public static List<String> generateRandomSequences(int sc, int sl) {
         List<String> randomSequences = new ArrayList<>(sc);
-        IntStream.range(0,sc).forEach(i -> Utils.randomBases(sl));
+        range(0,sc).forEach(i -> Utils.randomBases(sl));
         return randomSequences;
     }
 
@@ -60,7 +63,7 @@ public class SequenceGenerator {
      * @return bindingSites
      */
     public static List<String> generateBindingSites(int sc, WeightMatrix motif) {
-        return IntStream.range(0,sc).mapToObj(i -> motif.sample()).collect(Collectors.toList());
+        return range(0,sc).mapToObj(i -> motif.sample()).collect(Collectors.toList());
     }
 
     /**
@@ -70,9 +73,16 @@ public class SequenceGenerator {
      * @param sequences
      * @return plantedSequences, list of pairs of the planted sequence and location of plant
      */
-    public static List<Pair<String,Integer>> plantMotifInSequences(List<String> sites, List<String> sequences) {
-        //TODO: IMPLEMENT THIS
-        return null;
+    public static List<Pair<String,Integer>> plantMotifInSequences(int sc, int ml, List<String> sites, List<String> sequences) {
+        Random r = new Random();
+        int bound = sc - ml;
+        return range(0,sc).mapToObj(i -> {
+            String sequence = sequences.get(i);
+            int idx = r.nextInt(bound);
+            String start = sequence.substring(0,idx);
+            String end = sequence.substring(idx+ml);
+            return new Pair<>(start + sites.get(i) + end, idx);
+        }).collect(Collectors.toList());
     }
 
     /**
