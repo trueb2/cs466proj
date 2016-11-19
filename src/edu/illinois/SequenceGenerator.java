@@ -3,6 +3,7 @@ package edu.illinois;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 /**
  * Created by jwtrueb on 10/21/16.
@@ -34,9 +35,7 @@ public class SequenceGenerator {
      */
     public static ArrayList<String> generateRandomSequences(int sc, int sl) {
         ArrayList<String> randomSequences = new ArrayList<>(sc);
-        for(int i = 0; i < sc; i++) {
-            randomSequences.add(Utils.randomBases(sl));
-        }
+        IntStream.range(0,sc).forEach(i -> Utils.randomBases(sl));
         return randomSequences;
     }
 
