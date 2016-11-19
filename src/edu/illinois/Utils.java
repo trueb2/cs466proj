@@ -94,4 +94,11 @@ public class Utils {
                 return -1;
         }
     }
+
+    public static int[] without(int[] with, int exclude) {
+        return IntStream.range(0, with.length)
+                .filter(i -> i != exclude)
+                .map(i -> with[i])
+                .toArray();
+    }
 }

@@ -48,8 +48,7 @@ public class SequenceGenerator {
      * @return motif
      */
     public static WeightMatrix generateMotif(double icpc, int ml) {
-        //TODO: IMPLEMENT THIS
-        return new WeightMatrix();
+        return new WeightMatrix(icpc, ml);
     }
 
     /**
