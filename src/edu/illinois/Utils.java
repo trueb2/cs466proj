@@ -28,8 +28,7 @@ public class Utils {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    static String randomBases(int len) {
-        Random r = new Random(System.currentTimeMillis());
+    static String randomBases(int len, Random r) {
         StringBuilder sequence = new StringBuilder(len);
         for(int j = 0; j < len; j++) {
             sequence.append(BASES[r.nextInt(4)]);

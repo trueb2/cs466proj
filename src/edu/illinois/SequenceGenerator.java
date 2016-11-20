@@ -2,6 +2,10 @@ package edu.illinois;
 
 import javafx.util.Pair;
 
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +24,14 @@ public class SequenceGenerator {
                                String fastaFileName,
                                String sitesFileName,
                                String motifFileName,
-                               String motifLengthFileName) {
+                               String motifLengthFileName) throws FileNotFoundException, UnsupportedEncodingException {
         List<String> sequences = generateRandomSequences(sc, sl);
         WeightMatrix motif = generateMotif(icpc, ml);
         List<String> bindingSites = generateBindingSites(sc, motif);
-        List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(sc, ml, bindingSites, sequences);
-        writeFasta(Utils.getSequenceFromPair(plantedSequences), fastaFileName);
-        writeSites(Utils.getSiteFromPair(plantedSequences), sitesFileName);
-        writeMotif(motif, motifFileName);
+        List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(sc, sl, ml, bindingSites, sequences);
+        writeFasta(sc, Utils.getSequenceFromPair(plantedSequences), fastaFileName);
+        writeSites(sc, bindingSites, Utils.getSiteFromPair(plantedSequences), sitesFileName);
+        writeMotif(ml, motif, motifFileName);
         writeMotifLength(ml, motifLengthFileName);
     }
 
@@ -40,9 +44,10 @@ public class SequenceGenerator {
      * @return generateSequences
      */
     public static List<String> generateRandomSequences(int sc, int sl) {
-        List<String> randomSequences = new ArrayList<>(sc);
-        range(0,sc).forEach(i -> Utils.randomBases(sl));
-        return randomSequences;
+        Random r = new Random();
+        return range(0,sc)
+                .mapToObj(i -> Utils.randomBases(sl, r))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -63,7 +68,8 @@ public class SequenceGenerator {
      * @return bindingSites
      */
     public static List<String> generateBindingSites(int sc, WeightMatrix motif) {
-        return range(0,sc).mapToObj(i -> motif.sample()).collect(Collectors.toList());
+        Random r = new Random();
+        return range(0,sc).mapToObj(i -> motif.sample(r)).collect(Collectors.toList());
     }
 
     /**
@@ -73,9 +79,9 @@ public class SequenceGenerator {
      * @param sequences
      * @return plantedSequences, list of pairs of the planted sequence and location of plant
      */
-    public static List<Pair<String,Integer>> plantMotifInSequences(int sc, int ml, List<String> sites, List<String> sequences) {
+    public static List<Pair<String,Integer>> plantMotifInSequences(int sc, int sl, int ml, List<String> sites, List<String> sequences) {
         Random r = new Random();
-        int bound = sc - ml;
+        int bound = sl - ml;
         return range(0,sc).mapToObj(i -> {
             String sequence = sequences.get(i);
             int idx = r.nextInt(bound);
@@ -91,18 +97,32 @@ public class SequenceGenerator {
      * @param filename
      * @return success of writing to file
      */
-    public static boolean writeFasta(List<String> sequences, String filename) {
-        //TODO: IMPLEMENT THIS
-        return false;
+    public static void writeFasta(int sc, List<String> sequences, String filename) {
+        range(0,sc).parallel().forEach(i -> {
+            String sequence = sequences.get(i);
+            try {
+                PrintWriter printWriter = new PrintWriter(filename + i + ".fa", "UTF-8");
+                printWriter.println(">"+filename+""+i);
+                printWriter.println(sequence);
+                printWriter.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     /**
      * Use any format for writing down the location of the planted site in each sequence
      * @param sites
+     * @param siteFromPair
      * @param filename
      */
-    static void writeSites(List<Integer> sites, String filename) {
-        //TODO: IMPLEMENT THIS
+    static void writeSites(int sc, List<String> sites, ArrayList<Integer> siteFromPair, String filename) throws FileNotFoundException, UnsupportedEncodingException {
+        final PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
+        range(0,sc).forEach(i -> printWriter.println(String.format("%s %d", sites.get(i), siteFromPair.get(i))));
+        printWriter.close();
     }
 
     /**
@@ -111,8 +131,12 @@ public class SequenceGenerator {
      * @param motif
      * @param filename
      */
-    public static void writeMotif(WeightMatrix motif, String filename) {
-        //TODO: IMPLEMENT THIS
+    public static void writeMotif(int ml, WeightMatrix motif, String filename) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
+        printWriter.println(String.format(">%s\t%d", filename, ml));
+        printWriter.println(motif); //not exactly right for debugging purposes
+        printWriter.println("<");
+        printWriter.close();
     }
 
     /**
@@ -120,7 +144,9 @@ public class SequenceGenerator {
      * @param ml
      * @param filename
      */
-    public static void writeMotifLength(int ml, String filename) {
-        //TODO: IMPLEMENT THIS
+    public static void writeMotifLength(int ml, String filename) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
+        printWriter.println(ml);
+        printWriter.close();
     }
 }

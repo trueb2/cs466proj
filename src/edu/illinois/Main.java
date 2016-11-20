@@ -1,8 +1,11 @@
 package edu.illinois;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         //information content per column
         double icpc = Double.parseDouble(args[0]);
         //motif length
@@ -13,7 +16,7 @@ public class Main {
         int sc = Integer.parseInt(args[3]);
 
         SequenceGenerator.createAndWrite(icpc, ml, sl, sc,
-                "sequences.fa",
+                "sequences",
                 "sites.txt",
                 "motif.txt",
                 "motiflength.txt");

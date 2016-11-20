@@ -3,6 +3,7 @@ package edu.illinois;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import static java.util.stream.IntStream.*;
@@ -111,8 +112,7 @@ public class WeightMatrix {
      * Use the weights to randomly select a base ml times to form a sampled motif
      * @return motif, String
      */
-    public String sample() {
-        Random r = new Random();
+    public String sample(Random r) {
         StringBuilder stringBuilder = new StringBuilder();
         range(0,ml).forEach(i -> {
             int randomWeight = r.nextInt(countSum);
@@ -127,9 +127,9 @@ public class WeightMatrix {
 
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for(int[] b : countMatrix)
-            stringBuilder.append(String.format("%d %d %d %d [%f]\n", b[0], b[1], b[2], b[3], calcInformationContent(b)));
-        return stringBuilder.toString();
+        return Arrays.asList(countMatrix)
+                .stream()
+                .map(b -> String.format("%d %d %d %d [%f]", b[0], b[1], b[2], b[3], calcInformationContent(b)))
+                .collect(Collectors.joining("\n"));
     }
 }
