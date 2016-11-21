@@ -2,6 +2,7 @@ package edu.illinois;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 /**
  * Created by jwtrueb on 11/18/16.
  */
@@ -25,9 +26,6 @@ public class MotifFinder {
     // print out all sites recorded for each sequence
     // print out motif weighted array by choosen sites
 
-// TODO
-    
-
 
     // Load all sequences from *.fa
     public List<String> readFAFile(String path){
@@ -49,14 +47,17 @@ public class MotifFinder {
                     in = br.readLine();
                 }
             }
+            out.add( sb.toString() );
             return out;
         }catch(IOException e) {
             System.out.println("No Input Sequence");
-            return out;
+            return new ArrayList<String>();
         }
     }
     // Load length of Motif from size.txt
     public int readSizeFile(String path){
+        // TODO
+        // format? test?
         try{
             BufferedReader br = new BufferedReader(new FileReader(path));
             String in = br.readLine();
@@ -67,14 +68,18 @@ public class MotifFinder {
         }
     }
     // randomly choose motif sites for each sequences
-    public List<Integer> chooseMotifSites(ArrayList<String> seq, int motifSize){
+    public List<Integer> chooseMotifSites(List<String> seq, int motifSize){
         List<Integer> motifSites = new ArrayList<Integer>();
         Random rand = new Random(System.currentTimeMillis()); 
         int ran;
         for(String motif:seq){
-            ran = rand.nextInt(); 
-            ran = (ran > 0)? ran%(motif.length() - motifSize + 1):(-ran)%(motif.length() - motifSize + 1);
-            motifSites.add(ran);
+            if(motif.length() >= motifSize ){
+                ran = rand.nextInt();
+                ran = (ran > 0)? ran%(motif.length() - motifSize + 1):(-ran)%(motif.length() - motifSize + 1);
+                motifSites.add(ran);
+            }else{
+                motifSites.add(-1);
+            }
         }
         return motifSites;
     }

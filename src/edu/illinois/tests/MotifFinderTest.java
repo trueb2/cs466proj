@@ -5,7 +5,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static edu.illinois.SequenceGenerator.*;
+
+import edu.illinois.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -17,18 +18,26 @@ public class MotifFinderTest {
     @Test
     public void readFAFileTest1() {
         MotifFinder mf = new MotifFinder();
-        mf.readFAFile(./test.fa);
-        List<String> readFAFile = generateRandomSequences(2,10);
-        assertEquals(readFAFile.size(),2);
-        assertEquals(readFAFile.get(0),"MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGLVSVKVSDDFTIAAMRPSYLSYEDLDMTFVENEYKALVAELEKENEERRRLKDPNKPEHKIPQFASRKQLSDAILKEAEEKIKEELKAQGKPEKIWDNIIPGKMNSFIADNSQLDSKLTLMGQFYVMDDKKTVEQVIAEKEKEFGGKIKIVEFICFEVGEGLEKKTEDFAAEVAAQL");
-        assertEquals(readFAFile.get(1),"SATVSEINSETDFVAKNDQFIALTKDTTAHIQSNSLQSVEELHSSTINGVKFEEYLKSQIATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH");
+        List<String> readFAFile = mf.readFAFile("./test.fa");
+        assertEquals(2,readFAFile.size());
+        assertEquals("MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGLVSVKVSDDFTIAAMRPSYLSYEDLDMTFVENEYKALVAELEKENEERRRLKDPNKPEHKIPQFASRKQLSDAILKEAEEKIKEELKAQGKPEKIWDNIIPGKMNSFIADNSQLDSKLTLMGQFYVMDDKKTVEQVIAEKEKEFGGKIKIVEFICFEVGEGLEKKTEDFAAEVAAQL",readFAFile.get(0));
+        assertEquals("SATVSEINSETDFVAKNDQFIALTKDTTAHIQSNSLQSVEELHSSTINGVKFEEYLKSQIATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH",readFAFile.get(1));
     }
 
-//    @Test
-//    public void generateRandomMotif1() {
-//        String motif = generateMotif(1, 10);
-//        assertEquals(10, motif.length());
-//    }
+    @Test
+    public void chooseMotifSitesTest1() {
+        MotifFinder mf = new MotifFinder();
+        List<String> readFAFile = new ArrayList<String>();
+        readFAFile.add("A");
+        readFAFile.add("AB");
+        readFAFile.add("ABC");
+        readFAFile.add("ABCABCABCABCABC"); // length = 15
+        List<Integer> sites = mf.chooseMotifSites(readFAFile,2);
+        assertTrue( sites.get(0) == -1 );
+        assertTrue( sites.get(1) == 0);
+        assertTrue( sites.get(2) <= 1 );
+        assertTrue( sites.get(3) <= 13 );
+    }
 //
 //    @Test
 //    public void generateBindingSites1() {
