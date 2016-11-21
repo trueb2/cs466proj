@@ -1,5 +1,7 @@
 package edu.illinois;
-
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * Created by jwtrueb on 11/18/16.
  */
@@ -28,12 +30,12 @@ public class MotifFinder {
 
 
     // Load all sequences from *.fa
-    public ArrayList<String> readFAFile(String path){
+    public List<String> readFAFile(String path){
         try{
             BufferedReader br = new BufferedReader(new FileReader(path));
             String in = br.readLine();
             StringBuffer sb = new StringBuffer();
-            ArrayList<String> out = new ArrayList<String>();
+            List<String> out = new ArrayList<String>();
             if(in.charAt(0) == '>'){
                     in = br.readLine();
             }
@@ -65,8 +67,8 @@ public class MotifFinder {
         }
     }
     // randomly choose motif sites for each sequences
-    public ArrayList<Integer> chooseMotifSites(ArrayList<String> seq, int motifSize){
-        ArrayList<Integer> motifSites = new ArrayList<Integer>();
+    public List<Integer> chooseMotifSites(ArrayList<String> seq, int motifSize){
+        List<Integer> motifSites = new ArrayList<Integer>();
         Random rand = new Random(System.currentTimeMillis()); 
         int ran;
         for(String motif:seq){
