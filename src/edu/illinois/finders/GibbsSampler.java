@@ -1,12 +1,15 @@
-package edu.illinois;
+package edu.illinois.finders;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static java.util.stream.IntStream.range;
+
 /**
  * Created by jwtrueb on 11/18/16.
  */
-public class MotifFinder {
+public class GibbsSampler extends MotifFinder {
 /**   pseudo code
 *     Load all sequences from *.fa
 *     Load length of Motif from size.txt
@@ -25,76 +28,39 @@ public class MotifFinder {
 *     ? print out all sites recorded for each sequence
 *     ? print out motif weighted array by choosen sites
 */
-    public MotifFinder(String faPath,String sizePath, String outputPath){
-        // Read Fils
-        List<String> seq = readFAFile(faPath);
-        int motifSize = readSizeFile(sizePath);
+    public GibbsSampler(String faPath, String sizePath, String outputPath){
+        //Read Files
+        super(faPath, sizePath);
+
         // Run Gibbs Sample Algorithm to predict sites
-        List<Integer> predictedSites = gibbsSamp(seq, motifSize, 10000);
+        List<Integer> predictedSites = gibbsSamp(sequences, motifLength, 10000);
         // TODO : Run many times and make a poll for right Sites
 
         // Collect and Print Data
         List<String> predictedMotif = new ArrayList<>();
         for(int sqIndex = 0; sqIndex < predictedSites.size(); sqIndex++){
-            predictedMotif.add( seq.get(sqIndex).substring( predictedSites.get(sqIndex),predictedSites.get(sqIndex)+ motifSize ) );
+            predictedMotif.add( sequences.get(sqIndex).substring( predictedSites.get(sqIndex),predictedSites.get(sqIndex)+ motifLength ) );
         }
         List<List<Integer>> pm = getPM(predictedMotif);
         // printSitesFile(predictedSites,outputPath);
         // printMotifFile(pm,outputPath);
     }
-    public MotifFinder(){
+
+    public GibbsSampler(){
 
     }
-
 
     /**
-     * Load all sequences from *.fa
-     * @param path path of fa file
-     * @return Sets of Gene Sequence String
+     * Method implemented by all MotifFinders that
+     * will perform the search for the motifs in the sequences
      */
-    public List<String> readFAFile(String path){
-        try{
-            BufferedReader br = new BufferedReader(new FileReader(path));
-            String in = br.readLine();
-            StringBuffer sb = new StringBuffer();
-            List<String> out = new ArrayList<String>();
-            if(in.charAt(0) == '>'){
-                    in = br.readLine();
-            }
-            while(in != null){
-                if(in.charAt(0) == '>'){
-                    out.add( sb.toString() );
-                    sb = new StringBuffer();
-                    in = br.readLine();
-                }else{
-                    sb.append(in);
-                    in = br.readLine();
-                }
-            }
-            out.add( sb.toString() );
-            return out;
-        }catch(IOException e) {
-            System.out.println("No Input Sequence");
-            return new ArrayList<String>();
-        }
+    public void find() {
+        System.out.println("============= Input Sequences =============");
+        System.out.println(sequences);
+        System.out.println("============= Result of Gibbs Sampling Algorithm =============");
+        range(0, 15).forEach(i -> System.out.println(gibbsSamp(sequences, motifLength, 10000)));
     }
-    /**
-     * Load size.txt
-     * @param path path of size file
-     * @return int of motif size
-     */
-    public int readSizeFile(String path){
-        // TODO
-        // format? test?
-        try{
-            BufferedReader br = new BufferedReader(new FileReader(path));
-            String in = br.readLine();
-            return Integer.valueOf(in);
-        }catch(IOException e) {
-            System.out.println("No Input Size");
-            return 0;
-        }
-    }
+
     /**
      * Randomly choose position in each seq to be motif sites
      * @param seqSet Sets of Gene Sequence String

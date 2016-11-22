@@ -1,12 +1,11 @@
 package edu.illinois.tests;
 
+import edu.illinois.finders.GibbsSampler;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import edu.illinois.*;
 
 import static edu.illinois.SequenceGenerator.generateRandomSequences;
 import static org.junit.Assert.assertEquals;
@@ -15,20 +14,20 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by jwtrueb on 10/21/16.
  */
-public class MotifFinderTest {
+public class GibbsSamplerTest {
 
     @Test
     public void readFAFileTest1() {
-        MotifFinder mf = new MotifFinder();
-        List<String> readFAFile = mf.readFAFile("./test.fa");
-        assertEquals(2,readFAFile.size());
-        assertEquals("MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGLVSVKVSDDFTIAAMRPSYLSYEDLDMTFVENEYKALVAELEKENEERRRLKDPNKPEHKIPQFASRKQLSDAILKEAEEKIKEELKAQGKPEKIWDNIIPGKMNSFIADNSQLDSKLTLMGQFYVMDDKKTVEQVIAEKEKEFGGKIKIVEFICFEVGEGLEKKTEDFAAEVAAQL",readFAFile.get(0));
-        assertEquals("SATVSEINSETDFVAKNDQFIALTKDTTAHIQSNSLQSVEELHSSTINGVKFEEYLKSQIATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH",readFAFile.get(1));
+        GibbsSampler mf = new GibbsSampler();
+        List<String> readFastaFile = mf.readFastaFile("./test.fa");
+        assertEquals(2,readFastaFile.size());
+        assertEquals("MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGLVSVKVSDDFTIAAMRPSYLSYEDLDMTFVENEYKALVAELEKENEERRRLKDPNKPEHKIPQFASRKQLSDAILKEAEEKIKEELKAQGKPEKIWDNIIPGKMNSFIADNSQLDSKLTLMGQFYVMDDKKTVEQVIAEKEKEFGGKIKIVEFICFEVGEGLEKKTEDFAAEVAAQL",readFastaFile.get(0));
+        assertEquals("SATVSEINSETDFVAKNDQFIALTKDTTAHIQSNSLQSVEELHSSTINGVKFEEYLKSQIATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH",readFastaFile.get(1));
     }
 
     @Test
     public void chooseMotifSitesTest1() {
-        MotifFinder mf = new MotifFinder();
+        GibbsSampler mf = new GibbsSampler();
         List<String> readFAFile = new ArrayList<String>();
         readFAFile.add("A");
         readFAFile.add("AB");
@@ -42,7 +41,7 @@ public class MotifFinderTest {
     }
     @Test
     public void getPMTest1() {
-        MotifFinder mf = new MotifFinder();
+        GibbsSampler mf = new GibbsSampler();
         List<String> seq = new ArrayList<String>();
         seq.add("ATTGA");
         seq.add("TGGTG");
@@ -60,7 +59,7 @@ public class MotifFinderTest {
     }
     @Test
     public void pm2PWMTest1() {
-        MotifFinder mf = new MotifFinder();
+        GibbsSampler mf = new GibbsSampler();
         List<String> seq = new ArrayList<String>();
         seq.add("AGAG");
         seq.add("TGAG");
@@ -90,7 +89,7 @@ public class MotifFinderTest {
     }
     @Test
     public void genLogProbbyTTest1() {
-        MotifFinder mf = new MotifFinder();
+        GibbsSampler mf = new GibbsSampler();
         List<String> seq = new ArrayList<String>();
         seq.add("AAAA");
         seq.add("AAAA");
@@ -121,17 +120,28 @@ public class MotifFinderTest {
         System.out.println("============= Correct Answer=============");
         System.out.println(correct);
         System.out.println("============= Result of Gibbs Sampling Algorithm =============");
-        MotifFinder mf = new MotifFinder();
+        GibbsSampler mf = new GibbsSampler();
         for(int times = 15 ; times > 0; times--) System.out.println(mf.gibbsSamp(seq,9,10000)) ;
 
     }
-//
-//    @Test
-//    public void generateBindingSites1() {
-//        ArrayList<String> sequences = generateRandomSequences(10,20);
-//        String motif = generateMotif(1,4);
-//        ArrayList<Integer> bindingSites = generateBindingSites(sequences,motif);
-//        assertTrue(bindingSites.stream().max(Integer::max).get() < 16);
-//        assertTrue(bindingSites.stream().min(Integer::min).get() >= 0);
-//    }
+
+    @Test
+    public void findTest() {
+        List<String> seq = generateRandomSequences(5,20);
+        String motif = "GGGGAGGGG";
+        Random rand = new Random(System.currentTimeMillis());
+        List<Integer> correct = new ArrayList<>();
+        for(int i = 0; i < 5; i++) {
+            int ran = rand.nextInt( 20 );
+            correct.add(ran);
+            seq.set( i, seq.get(i).substring(0,ran).concat(motif).concat( seq.get(i).substring(ran) ) );
+        }
+        System.out.println("============= Correct Answer=============");
+        System.out.println(correct);
+
+        GibbsSampler gs = new GibbsSampler();
+        gs.setSequences(seq);
+        gs.setMotifLength(motif.length());
+        gs.find();
+    }
 }
