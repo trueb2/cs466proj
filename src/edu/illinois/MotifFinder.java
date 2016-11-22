@@ -1,37 +1,57 @@
 package edu.illinois;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 /**
  * Created by jwtrueb on 11/18/16.
  */
 public class MotifFinder {
-    // pseudo code? 
-    // Load all sequences from *.fa
-    // Load length of Motif from size.txt
-    // randomly choose motif sites for each sequences
-    // recursively do the gibbs sampling
-        // randomly choose one sequence chosSq
-            // recursively go through every subseq in chosSq
-                // calculate Q
-                    // 1. gen PWM all choosen sites except chosSq
-                    // 2. get Q
-                // calculate P
-                    // 1. Use background PWM
-                    // 2. get P
-                // Q/P is largest then record it
+/**   pseudo code
+*     Load all sequences from *.fa
+*     Load length of Motif from size.txt
+*     randomly choose motif sites (theta set) for each sequences
+*     recursively do the gibbs sampling
+*         randomly choose one sequence as chosen Seq
+*             recursively go through every possible motif position in chosen Seq
+*                 calculate Q
+*                     1. gen PM and PWM of theta set except chosen Seq
+*                     2. get Q probability based on PWM of theta set
+*                 calculate P
+*                     1. Log 0.25 * motif_length
+*                 Q/P is the largest then record the position to the chosen motif sites
+*     return the motif sites set
+*
+*     ? print out all sites recorded for each sequence
+*     ? print out motif weighted array by choosen sites
+*/
+    public MotifFinder(String faPath,String sizePath, String outputPath){
+        // Read Fils
+        List<String> seq = readFAFile(faPath);
+        int motifSize = readSizeFile(sizePath);
+        // Run Gibbs Sample Algorithm to predict sites
+        List<Integer> predictedSites = gibbsSamp(seq, motifSize, 10000);
+        // TODO : Run many times and make a poll for right Sites
 
-            // replace the choosen motif sites of chosSq by the largest one
-    // print out all sites recorded for each sequence
-    // print out motif weighted array by choosen sites
+        // Collect and Print Data
+        List<String> predictedMotif = new ArrayList<>();
+        for(int sqIndex = 0; sqIndex < predictedSites.size(); sqIndex++){
+            predictedMotif.add( seq.get(sqIndex).substring( predictedSites.get(sqIndex),predictedSites.get(sqIndex)+ motifSize ) );
+        }
+        List<List<Integer>> pm = getPM(predictedMotif);
+        // printSitesFile(predictedSites,outputPath);
+        // printMotifFile(pm,outputPath);
+    }
+    public MotifFinder(){
+
+    }
 
 
-
-
-
-    // Load all sequences from *.fa
+    /**
+     * Load all sequences from *.fa
+     * @param path path of fa file
+     * @return Sets of Gene Sequence String
+     */
     public List<String> readFAFile(String path){
         try{
             BufferedReader br = new BufferedReader(new FileReader(path));
@@ -58,7 +78,11 @@ public class MotifFinder {
             return new ArrayList<String>();
         }
     }
-    // Load length of Motif from size.txt
+    /**
+     * Load size.txt
+     * @param path path of size file
+     * @return int of motif size
+     */
     public int readSizeFile(String path){
         // TODO
         // format? test?
@@ -71,12 +95,17 @@ public class MotifFinder {
             return 0;
         }
     }
-    // randomly choose motif sites for each sequences
-    public List<Integer> chooseMotifSites(List<String> seq, int motifSize){
+    /**
+     * Randomly choose position in each seq to be motif sites
+     * @param seqSet Sets of Gene Sequence String
+     * @param motifSize motif size
+     * @return Set of int indicate position of motif in each seq
+     */
+    public List<Integer> chooseMotifSites(List<String> seqSet, int motifSize){
         List<Integer> motifSites = new ArrayList<Integer>();
         Random rand = new Random(System.currentTimeMillis()); 
         int ran;
-        for(String motif:seq){
+        for(String motif:seqSet){
             if(motif.length() >= motifSize ){
                 ran = rand.nextInt( motif.length() - motifSize + 1 );
                 motifSites.add(ran);
@@ -87,15 +116,14 @@ public class MotifFinder {
         return motifSites;
     }
     /**
-     * Generate probability according to theta set for each position
-     * @param seqSet
-     * @param chosenSeq
-     * @param sites
-     * @param motifSize
-     * @return success of writing to file
+     * Generate probability depending on theta set ( predicted motifs except the chosen seq ) for recSite position in chosen seq
+     * @param seqSet Sets of Gene Sequence String
+     * @param chosenSeq the chosen seq in which finding best subsequence to match theta set
+     * @param sites all start index of predicted motifs in seqSet
+     * @param motifSize motif size
+     * @return Log of Probability based on theta set
      */
     public double genLogProbbyT( List<String> seqSet ,int chosenSeq,int recSite ,List<Integer> sites, int motifSize){
-
         List<String> thetaSet = new ArrayList<>();
         for(int i = 0 ; i < seqSet.size(); i++){
             if(i != chosenSeq){
@@ -118,7 +146,12 @@ public class MotifFinder {
         }
         return prob;
     }
-
+    /**
+     * Generate Probability Weighted Matrix based on Profile Matrix
+     * If sup = 0, assign it a probability < 0.001 to avoid infinity problem
+     * @param pm Profile Matrix
+     * @return PWM list which is a ( List of position to (List of ACTG to Probability) )
+     */
     public List<List<Double>> pm2PWM(List<List<Integer>> pm) {
         List<Integer> char2Sup;
         List<List<Double>> pwm = new ArrayList<>(pm.size());
@@ -168,8 +201,8 @@ public class MotifFinder {
 
     /**
      * Generate Profile Matrix according to theta set for each position
-     * @param seqIn
-     * @return success of writing to file
+     * @param seqIn  predicted motifs String set (not index Set)
+     * @return Profile Matrix list ( List of position to (List of ACTG to Sup) )
      */
     public List<List<Integer>> getPM(List<String> seqIn) {
         List<List<Integer>> pos2CharNSup = new ArrayList<>( seqIn.get(0).length() );
@@ -195,11 +228,12 @@ public class MotifFinder {
         return pos2CharNSup;
     }
     /**
-     * gibbs sampling
-     * @param seqSet
-     * @return Sets of int , pointing the position motifs located in each sequence
+     * gibbs sampling, recursively choose a seq in seqSet and find best subSeq to match theta set all
+     * @param seqSet Sets of Gene Sequence String
+     * @param motifSize motif size
+     * @param recTimes iteration times
+     * @return Sets of int predicting the position motifs located in each sequence
      */
-    //
     public List<Integer> gibbsSamp(List<String> seqSet, int motifSize, int recTimes){
         // randomly choose motif sites for each sequences
         List<Integer> sites = chooseMotifSites(seqSet, motifSize);
