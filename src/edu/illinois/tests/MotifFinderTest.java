@@ -4,9 +4,11 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Random;
 
 import edu.illinois.*;
+
+import static edu.illinois.SequenceGenerator.generateRandomSequences;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -105,12 +107,23 @@ public class MotifFinderTest {
     }
     @Test
     public void gibbsSampTest1() {
+        List<String> seq = generateRandomSequences(5,20);
+        String motif = "GGGGAGGGG";
+        Random rand = new Random(System.currentTimeMillis());
+        List<Integer> correct = new ArrayList<>();
+        for(int i = 0; i < 5; i++) {
+            int ran = rand.nextInt( 20 );
+            correct.add(ran);
+            seq.set( i, seq.get(i).substring(0,ran).concat(motif).concat( seq.get(i).substring(ran) ) );
+        }
+        System.out.println("============= Input Sequences =============");
+        System.out.println(seq) ;
+        System.out.println("============= Correct Answer=============");
+        System.out.println(correct);
+        System.out.println("============= Result of Gibbs Sampling Algorithm =============");
         MotifFinder mf = new MotifFinder();
-        List<String> seq = new ArrayList<String>();
-        seq.add("GCGGTTGG");
-        seq.add("CTGGTGCG");
-        seq.add("ATGCTGGT");
-        System.out.print(mf.gibbsSamp(seq,3,1000)) ;
+        for(int times = 15 ; times > 0; times--) System.out.println(mf.gibbsSamp(seq,9,10000)) ;
+
     }
 //
 //    @Test
