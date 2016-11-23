@@ -28,28 +28,16 @@ public class GibbsSampler extends MotifFinder {
 *     ? print out all sites recorded for each sequence
 *     ? print out motif weighted array by choosen sites
 */
-    public GibbsSampler(String faPath, String sizePath, String outputPath){
+    public GibbsSampler(String faPath, String sizePath, String outputPath) {
         //Read Files
         super(faPath, sizePath);
 
         // Run Gibbs Sample Algorithm to predict sites
-        List<Integer> predictedSites = gibbsSamp(sequences, motifLength, 10000);
-        // TODO : Run many times and make a poll for right Sites
-
-        // Collect and Print Data
-        List<String> predictedMotif = new ArrayList<>();
-        for(int sqIndex = 0; sqIndex < predictedSites.size(); sqIndex++){
-            predictedMotif.add( sequences.get(sqIndex).substring( predictedSites.get(sqIndex),predictedSites.get(sqIndex)+ motifLength ) );
-        }
-        List<List<Integer>> pm = getPM(predictedMotif);
-        // printSitesFile(predictedSites,outputPath);
-        // printMotifFile(pm,outputPath);
+        List<Integer> predictedSites = gibbsSamplingfinder(15, outputPath);
     }
-
     public GibbsSampler(){
 
-    }
-
+        }
     /**
      * Method implemented by all MotifFinders that
      * will perform the search for the motifs in the sequences
@@ -57,18 +45,29 @@ public class GibbsSampler extends MotifFinder {
     public void find() {
         System.out.println("============= Input Sequences =============");
         System.out.println(sequences);
-        System.out.println("============= Result of Gibbs Sampling Algorithm =============");
+        System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
         // range(0, 15).forEach(i -> System.out.println(gibbsSamp(sequences, motifLength, 10000)));
         // Run Gibbs Sample Algorithm to predict sites
+        int itrTimes = 10;
+        List<Integer> bestSites = gibbsSamplingfinder(itrTimes,"./");
+    }
+    /**
+     * Calculate motif sites by iteratively running gibbs sampling for @itrTimes Times
+     * And find the motif set with the highest Information content and return the sites
+     * @param itrTimes iteration times for gibbs sampling
+     * @param outputPath Path for output files "predictedmotif.txt" "predictedsites.txt"
+     * @return Set of motif sites
+     */
+    public List<Integer> gibbsSamplingfinder(int itrTimes,String outputPath) {
         List<List<String>> predictedMotifSet = new ArrayList<>();
         List<String> predictedMotif;
         List<Integer> predictedSites;
         List<Integer> bestSites = new ArrayList<>();
-        List<String> bestMotifs;
+        List<String> bestMotifs = new ArrayList<>();
         double bestIC = Double.MIN_VALUE;
         double tempIC;
         // Run 10 times and Find the best Information Content
-        for(int times = 0; times < 10; times++){
+        for(int times = 0; times < itrTimes; times++){
             predictedSites = gibbsSamp(sequences, motifLength, 10000);
             System.out.println(predictedSites);
             predictedMotif = new ArrayList<>();
@@ -84,7 +83,40 @@ public class GibbsSampler extends MotifFinder {
         }
         System.out.println("============= Result of Gibbs Sampling Algorithm with highest Information Content =============");
         System.out.println(bestSites);
+        //Print files
+        // Collect and Print Data
+        printFiles(bestSites, bestMotifs,outputPath);
+
+        return bestSites;
     }
+    /**
+     * Calculate motif sites by iteratively running gibbs sampling for @itrTimes Times
+     * And find the motif set with the highest Information content and return the sites
+     * @param bestSites best sites set found by gibbs sampling
+     * @param bestMotifs best motif string set found by gibbs sampling
+     * @param outputPath Path for output files "predictedmotif.txt" "predictedsites.txt"
+     */
+    private void printFiles(List<Integer> bestSites, List<String> bestMotifs,String outputPath) {
+        try {
+            List<List<Integer>> pm = getPM(bestMotifs);
+            PrintWriter writer = new PrintWriter(outputPath+"predictedmotif.txt", "UTF-8");
+            writer.print(">MOTIF1\t" + motifLength);
+            for (int i = 0; i < pm.size(); i++) {
+                writer.print("\n");
+                for (int sup : pm.get(i)) {
+                    writer.print(sup + "\t");
+                }
+            }
+            writer.print("<");
+            writer.close();
+            writer = new PrintWriter(outputPath+"predictedsites.txt", "UTF-8");
+            writer.println(bestSites);
+            writer.close();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Calculate Information content for input PWM
      * @param predictedMotif Predicted Motif String set

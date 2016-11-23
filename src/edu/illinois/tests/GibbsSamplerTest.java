@@ -104,26 +104,7 @@ public class GibbsSamplerTest {
         a.add(0);
         assertTrue( Math.log(0.25)*4 == mf.genLogProbbyT( seq ,0,0,a, 4));
     }
-    @Test
-    public void gibbsSampTest1() {
-        List<String> seq = generateRandomSequences(5,20);
-        String motif = "GGGGAGGGG";
-        Random rand = new Random(System.currentTimeMillis());
-        List<Integer> correct = new ArrayList<>();
-        for(int i = 0; i < 5; i++) {
-            int ran = rand.nextInt( 20 );
-            correct.add(ran);
-            seq.set( i, seq.get(i).substring(0,ran).concat(motif).concat( seq.get(i).substring(ran) ) );
-        }
-        System.out.println("============= Input Sequences =============");
-        System.out.println(seq) ;
-        System.out.println("============= Correct Answer=============");
-        System.out.println(correct);
-        System.out.println("============= Result of Gibbs Sampling Algorithm =============");
-        GibbsSampler mf = new GibbsSampler();
-        for(int times = 15 ; times > 0; times--) System.out.println(mf.gibbsSamp(seq,9,10000)) ;
 
-    }
 
     @Test
     public void findTest() {
@@ -142,6 +123,7 @@ public class GibbsSamplerTest {
         GibbsSampler gs = new GibbsSampler();
         gs.setSequences(seq);
         gs.setMotifLength(motif.length());
-        gs.find();
+        System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
+        assertTrue(correct.containsAll( gs.gibbsSamplingfinder(15,"./")));
     }
 }
