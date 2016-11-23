@@ -14,7 +14,7 @@ public class Main {
             Integer sl = 500;
 
             args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
-            run(args);
+            run(args, true);
         } else if(args.length == 1) {
             //other default values
             double[] icpcDefaults = {1, 1.5, 2};
@@ -27,17 +27,17 @@ public class Main {
                     for(Integer sl : slDefaults) {
                         for(Integer sc : scDefaults) {
                             args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
-                            run(args);
+                            run(args, false);
                         }
                     }
                 }
             }
         } else {
-            run(args);
+            run(args, true);
         }
     }
 
-    private static void run(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+    private static void run(String[] args, boolean defaultOut) throws FileNotFoundException, UnsupportedEncodingException {
         //information content per column
         double icpc = Double.parseDouble(args[0]);
         //motif length
@@ -48,7 +48,7 @@ public class Main {
         int sc = Integer.parseInt(args[3]);
 
         //output file locations
-        String outDir = "out/data/seq";
+        String outDir = "out/data/seq" + (defaultOut ? "/" : "");
         String sequenceFileName = "sequences";
         String sitesFileName = "sites";
         String motifFileName = "motif";
