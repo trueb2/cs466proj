@@ -1,12 +1,43 @@
 package edu.illinois;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+        if(args.length == 0) {
+            //default
+            Double icpc = 2.0;
+            Integer ml = 8;
+            Integer sc = 10;
+            Integer sl = 500;
+
+            args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
+            run(args);
+        } else if(args.length == 1) {
+            //other default values
+            double[] icpcDefaults = {1, 1.5, 2};
+            int[] mlDefaults = {6, 7, 8};
+            int[] slDefaults = {500};
+            int[] scDefaults = {5, 10, 20};
+
+            for(Double icpc : icpcDefaults) {
+                for(Integer ml : mlDefaults) {
+                    for(Integer sl : slDefaults) {
+                        for(Integer sc : scDefaults) {
+                            args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
+                            run(args);
+                        }
+                    }
+                }
+            }
+        } else {
+            run(args);
+        }
+    }
+
+    private static void run(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         //information content per column
         double icpc = Double.parseDouble(args[0]);
         //motif length
@@ -17,27 +48,18 @@ public class Main {
         int sc = Integer.parseInt(args[3]);
 
         //output file locations
-        String outDir = "out/data/";
-        String sequenceFileName = outDir + "sequence";
-        String sitesFileName = outDir + "sites.txt";
-        String motifFileName = outDir + "motif.txt";
-        String motifLengthFileName = outDir + "motiflength.txt";
+        String outDir = "out/data/seq";
+        String sequenceFileName = "sequences";
+        String sitesFileName = "sites";
+        String motifFileName = "motif";
+        String motifLengthFileName = "motiflength";
 
-        //init directory for output
-        initOutDir(motifFileName);
-
+        //do sequence generation and write out files containing the descriptions
         SequenceGenerator.createAndWrite(icpc, ml, sl, sc,
+                outDir,
                 sequenceFileName,
                 sitesFileName,
                 motifFileName,
                 motifLengthFileName);
     }
-
-    private static void initOutDir(String motifFileName) {
-        File motifFile = new File(motifFileName);
-        File parentDir = motifFile.getParentFile();
-        if(parentDir != null)
-            parentDir.mkdirs();
-    }
-
 }
