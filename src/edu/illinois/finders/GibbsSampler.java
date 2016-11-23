@@ -58,9 +58,49 @@ public class GibbsSampler extends MotifFinder {
         System.out.println("============= Input Sequences =============");
         System.out.println(sequences);
         System.out.println("============= Result of Gibbs Sampling Algorithm =============");
-        range(0, 15).forEach(i -> System.out.println(gibbsSamp(sequences, motifLength, 10000)));
+        // range(0, 15).forEach(i -> System.out.println(gibbsSamp(sequences, motifLength, 10000)));
+        // Run Gibbs Sample Algorithm to predict sites
+        List<List<String>> predictedMotifSet = new ArrayList<>();
+        List<String> predictedMotif;
+        List<Integer> predictedSites;
+        List<Integer> bestSites = new ArrayList<>();
+        List<String> bestMotifs;
+        double bestIC = Double.MIN_VALUE;
+        double tempIC;
+        // Run 10 times and Find the best Information Content
+        for(int times = 0; times < 10; times++){
+            predictedSites = gibbsSamp(sequences, motifLength, 10000);
+            System.out.println(predictedSites);
+            predictedMotif = new ArrayList<>();
+            for(int sqIndex = 0; sqIndex < predictedSites.size(); sqIndex++){
+                predictedMotif.add( sequences.get(sqIndex).substring( predictedSites.get(sqIndex),predictedSites.get(sqIndex)+ motifLength ) );
+            }
+            tempIC = icPredictedMotif(predictedMotif);
+            if(tempIC > bestIC){
+                bestIC = tempIC;
+                bestMotifs = predictedMotif;
+                bestSites = predictedSites;
+            }
+        }
+        System.out.println("============= Result of Gibbs Sampling Algorithm with highest Information Content =============");
+        System.out.println(bestSites);
     }
-
+    /**
+     * Calculate Information content for input PWM
+     * @param predictedMotif Predicted Motif String set
+     * @return Sets of Gene Sequence String
+     */
+    public double icPredictedMotif(List<String> predictedMotif){
+        List<List<Integer>> pm = getPM(predictedMotif);
+        List<List<Double>> pwm = pm2PWM(pm);
+        double ic = 0;
+        for(int pos = 0; pos < pwm.size(); pos++){
+            for(int b = 0; b < 4; b++){
+                ic += pwm.get(pos).get(b)*( Math.log( pwm.get(pos).get(b) ) - Math.log( 0.25 ) );
+            }
+        }
+        return ic;
+    }
     /**
      * Randomly choose position in each seq to be motif sites
      * @param seqSet Sets of Gene Sequence String
