@@ -49,10 +49,10 @@ public class Main {
 
         //output file locations
         String outDir = "out/data/seq" + (defaultOut ? "/" : "");
-        String sequenceFileName = "sequences";
-        String sitesFileName = "sites";
-        String motifFileName = "motif";
-        String motifLengthFileName = "motiflength";
+        String sequenceFileName = "sequences.fa";
+        String sitesFileName = "sites.txt";
+        String motifFileName = "motif.txt";
+        String motifLengthFileName = "motiflength.txt";
 
         //do sequence generation and write out files containing the descriptions
         SequenceGenerator.createAndWrite(icpc, ml, sl, sc,
