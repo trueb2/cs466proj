@@ -112,8 +112,12 @@ public class GibbsSampler extends MotifFinder {
             }
             writer.print("\n<");
             writer.close();
+            //updated writing of predictedsites.txt to match sites.txt - muzammil
             writer = new PrintWriter(outputPath+"predictedsites.txt", "UTF-8");
-            writer.println(bestSites);
+            for (int i = 0; i < bestSites.size(); i++) {
+                writer.print(bestMotifs.get(i) + " ");
+                writer.print(bestSites.get(i) + "\n");
+            }
             writer.close();
         }catch(Exception e){
             e.printStackTrace();
