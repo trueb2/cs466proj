@@ -13,7 +13,6 @@ import static java.util.stream.IntStream.range;
 public class SequenceGenerator {
 
     public static void createAndWrite(double icpc, int ml, int sl, int sc,
-                               String outputDirectory,
                                String fastaFileName,
                                String sitesFileName,
                                String motifFileName,
@@ -23,7 +22,6 @@ public class SequenceGenerator {
         List<String> bindingSites = generateBindingSites(sc, motif);
         List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(sc, sl, ml, bindingSites, sequences);
         writeSequenceInfo(icpc, ml, sl, sc,
-                outputDirectory,
                 fastaFileName,
                 sitesFileName,
                 motifFileName,
@@ -92,11 +90,10 @@ public class SequenceGenerator {
 
     /**
      * Writes all of the files that need to be written
-     * @param icpc
+     * @param icpc, information content per column
      * @param ml
      * @param sl
      * @param sc
-     * @param outputDirectory
      * @param fastaFileName
      * @param sitesFileName
      * @param motifFileName
@@ -107,17 +104,12 @@ public class SequenceGenerator {
      * @throws FileNotFoundException
      * @throws UnsupportedEncodingException
      */
-    public static void writeSequenceInfo(double icpc, int ml, int sl, int sc, String outputDirectory, String fastaFileName, String sitesFileName, String motifFileName, String motifLengthFileName, WeightMatrix motif, List<String> bindingSites, List<Pair<String, Integer>> plantedSequences) throws FileNotFoundException, UnsupportedEncodingException {
+    public static void writeSequenceInfo(double icpc, int ml, int sl, int sc, String fastaFileName, String sitesFileName, String motifFileName, String motifLengthFileName, WeightMatrix motif, List<String> bindingSites, List<Pair<String, Integer>> plantedSequences) throws FileNotFoundException, UnsupportedEncodingException {
         //Create the output directory
-        outputDirectory = String.format("%s_%.1f_%d_%d_%d/", outputDirectory, icpc, ml, sl, sc);
-        fastaFileName = fastaFileName;
-        sitesFileName = outputDirectory + sitesFileName;
-        motifFileName = outputDirectory + motifFileName;
-        motifLengthFileName = outputDirectory + motifLengthFileName;
-        initOutputDirectory(motifFileName);
+        initOutputDirectory(fastaFileName);
 
         //Write files in the new directory
-        writeFasta(sc, Utils.getSequenceFromPair(plantedSequences), outputDirectory, fastaFileName);
+        writeFasta(sc, Utils.getSequenceFromPair(plantedSequences), fastaFileName);
         writeSites(sc, bindingSites, Utils.getSiteFromPair(plantedSequences), sitesFileName);
         writeMotif(ml, motif,motifFileName);
         writeMotifLength(ml, motifLengthFileName);
@@ -140,13 +132,13 @@ public class SequenceGenerator {
      * @param filename
      * @return success of writing to file
      */
-    public static void writeFasta(int sc, List<String> sequences, String outputDirectory, String filename) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter printWriter = new PrintWriter(outputDirectory + filename, "UTF-8");
+    public static void writeFasta(int sc, List<String> sequences, String filename) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
         range(0,sc).forEach(i -> {
             String sequence = sequences.get(i);
             StringBuilder stringBuilder = new StringBuilder(sequence);
             range(0,sequence.length()/80).forEach(j -> stringBuilder.insert(j+(80*(j+1)),"\n"));
-            stringBuilder.insert(0,String.format(">%s\n",filename+i));
+            stringBuilder.insert(0,String.format(">sequence%d\n",i));
             printWriter.println(stringBuilder.toString());
         });
         printWriter.close();

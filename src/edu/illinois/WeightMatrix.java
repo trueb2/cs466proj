@@ -129,7 +129,7 @@ public class WeightMatrix {
     public String toString() {
         return Arrays.asList(countMatrix)
                 .stream()
-                .map(b -> String.format("%d %d %d %d [%f]", b[0], b[1], b[2], b[3], calcInformationContent(b)))
+                .map(b -> String.format("%d %d %d %d", b[0], b[1], b[2], b[3]))
                 .collect(Collectors.joining("\n"));
     }
 }

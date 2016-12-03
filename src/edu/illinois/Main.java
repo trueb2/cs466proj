@@ -1,5 +1,7 @@
 package edu.illinois;
 
+import edu.illinois.finders.GibbsSampler;
+
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 
@@ -14,7 +16,7 @@ public class Main {
             Integer sl = 500;
 
             args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
-            run(args, true);
+            run(args);
         } else if(args.length == 1) {
             //other default values
             double[] icpcDefaults = {1, 1.5, 2};
@@ -27,17 +29,17 @@ public class Main {
                     for(Integer sl : slDefaults) {
                         for(Integer sc : scDefaults) {
                             args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
-                            run(args, false);
+                            run(args);
                         }
                     }
                 }
             }
         } else {
-            run(args, true);
+            run(args);
         }
     }
 
-    private static void run(String[] args, boolean defaultOut) throws FileNotFoundException, UnsupportedEncodingException {
+    public static void run(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         //information content per column
         double icpc = Double.parseDouble(args[0]);
         //motif length
@@ -48,18 +50,24 @@ public class Main {
         int sc = Integer.parseInt(args[3]);
 
         //output file locations
-        String outDir = "out/data/seq" + (defaultOut ? "/" : "");
-        String sequenceFileName = "sequences.fa";
-        String sitesFileName = "sites.txt";
-        String motifFileName = "motif.txt";
-        String motifLengthFileName = "motiflength.txt";
+        String outDir = String.format("out/data/seq_%.1f_%d_%d_%d/", icpc, ml, sl, sc);
+        String fastaFileName = outDir + "sequences.fa";
+        String sitesFileName = outDir + "sites.txt";
+        String motifFileName = outDir + "motif.txt";
+        String motifLengthFileName = outDir + "motiflength.txt";
 
         //do sequence generation and write out files containing the descriptions
         SequenceGenerator.createAndWrite(icpc, ml, sl, sc,
-                outDir,
-                sequenceFileName,
+                fastaFileName,
                 sitesFileName,
                 motifFileName,
                 motifLengthFileName);
+
+
+        //perform motif finding
+        GibbsSampler gibbsSampler = new GibbsSampler(fastaFileName, motifLengthFileName, outDir);
+        gibbsSampler.find(10000);
+
+        //run benchmarks
     }
 }

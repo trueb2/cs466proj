@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static java.util.stream.IntStream.range;
-
 /**
  * Created by jwtrueb on 11/18/16.
  */
 public class GibbsSampler extends MotifFinder {
-/**   pseudo code
+
+    private final double LOG_25 = Math.log(0.25);
+
+    /**   pseudo code
 *     Load all sequences from *.fa
 *     Load length of Motif from size.txt
 *     randomly choose motif sites (theta set) for each sequences
@@ -28,29 +29,31 @@ public class GibbsSampler extends MotifFinder {
 *     ? print out all sites recorded for each sequence
 *     ? print out motif weighted array by choosen sites
 */
-    public GibbsSampler(String faPath, String sizePath, String outputPath) {
+    public GibbsSampler(String faPath, String sizePath, String outputDirectory) {
         //Read Files
-        super(faPath, sizePath);
-
-        // Run Gibbs Sample Algorithm to predict sites
-        List<Integer> predictedSites = gibbsSamplingfinder(15, outputPath);
+        super(faPath, sizePath, outputDirectory);
     }
+
     public GibbsSampler(){
 
-        }
+    }
+
     /**
      * Method implemented by all MotifFinders that
      * will perform the search for the motifs in the sequences
      */
     public void find() {
-        System.out.println("============= Input Sequences =============");
-        System.out.println(sequences);
-        System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
-        // range(0, 15).forEach(i -> System.out.println(gibbsSamp(sequences, motifLength, 10000)));
-        // Run Gibbs Sample Algorithm to predict sites
-        int itrTimes = 10;
-        List<Integer> bestSites = gibbsSamplingfinder(itrTimes,"./");
+        find(10000);
     }
+
+    public void find(int iterations) {
+        System.out.println("============= Input Sequences =============");
+        sequences.stream().forEach(s -> System.out.println(s));
+        System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
+        // Run Gibbs Sample Algorithm to predict sites
+        List<Integer> bestSites = gibbsSamplingfinder(iterations, outputDirectory);
+    }
+
     /**
      * Calculate motif sites by iteratively running gibbs sampling for @itrTimes Times
      * And find the motif set with the highest Information content and return the sites
@@ -59,13 +62,13 @@ public class GibbsSampler extends MotifFinder {
      * @return Set of motif sites
      */
     public List<Integer> gibbsSamplingfinder(int itrTimes,String outputPath) {
-        List<List<String>> predictedMotifSet = new ArrayList<>();
         List<String> predictedMotif;
         List<Integer> predictedSites;
         List<Integer> bestSites = new ArrayList<>();
         List<String> bestMotifs = new ArrayList<>();
         double bestIC = Double.MIN_VALUE;
         double tempIC;
+
         // Run 10 times and Find the best Information Content
         for(int times = 0; times < itrTimes; times++){
             predictedSites = gibbsSamp(sequences, motifLength, 10000);
@@ -107,7 +110,7 @@ public class GibbsSampler extends MotifFinder {
                     writer.print(sup + "\t");
                 }
             }
-            writer.print("<");
+            writer.print("\n<");
             writer.close();
             writer = new PrintWriter(outputPath+"predictedsites.txt", "UTF-8");
             writer.println(bestSites);
@@ -128,7 +131,7 @@ public class GibbsSampler extends MotifFinder {
         double ic = 0;
         for(int pos = 0; pos < pwm.size(); pos++){
             for(int b = 0; b < 4; b++){
-                ic += pwm.get(pos).get(b)*( Math.log( pwm.get(pos).get(b) ) - Math.log( 0.25 ) );
+                ic += pwm.get(pos).get(b)*( Math.log( pwm.get(pos).get(b) ) - LOG_25);
             }
         }
         return ic;
@@ -292,7 +295,7 @@ public class GibbsSampler extends MotifFinder {
                 double q = genLogProbbyT( seqSet , chosenSeq, recSite , sites,  motifSize);
                 // calculate P
                 // Use background PWM => get Log P
-                double p = Math.log(0.25) * motifSize;
+                double p = LOG_25 * motifSize;
                 // Log Q - Log P (Q/P) is largest then record it
                 // replace the choosen motif sites of chosSq by the largest one
                 if( q - p > maxQoverP){
