@@ -36,7 +36,7 @@ public class Writer {
         //Write files in the new directory
         writeFasta(sc, Utils.getSequenceFromPair(plantedSequences), fastaFileName);
         writeSites(sc, bindingSites, Utils.getSiteFromPair(plantedSequences), sitesFileName);
-        writeMotif(ml, motif,motifFileName);
+        writeMotif(ml, motif,motifFileName,icpc);
         writeMotifLength(ml, motifLengthFileName);
     }
 
@@ -76,9 +76,9 @@ public class Writer {
      * @param motif
      * @param filename
      */
-    public static void writeMotif(int ml, WeightMatrix motif, String filename) throws FileNotFoundException, UnsupportedEncodingException {
+    public static void writeMotif(int ml, WeightMatrix motif, String filename, double icpc) throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
-        printWriter.println(String.format(">%s\t%d", filename, ml));
+        printWriter.println(String.format(">%s_%f\t%d", filename, icpc, ml));
         printWriter.println(motif); //not exactly right for debugging purposes
         printWriter.println("<");
         printWriter.close();

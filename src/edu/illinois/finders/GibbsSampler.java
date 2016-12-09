@@ -1,4 +1,5 @@
 package edu.illinois.finders;
+import edu.illinois.Matrix.MotifMatrix;
 import edu.illinois.Matrix.SequenceMatrix;
 import edu.illinois.Matrix.WeightMatrix;
 import edu.illinois.Utils;
@@ -78,10 +79,13 @@ public class GibbsSampler extends MotifFinder {
             System.out.println(informationContent + " :: " + s);
         });
 
-        System.out.println("======== Maximum Information Content :: " + maxInformationContent[0] / motifLength +" =========");
+        WeightMatrix motifMatrix = new SequenceMatrix(predictedMotifs);
+        Double icpc = maxInformationContent[0] / motifLength;
+        System.out.println("======== Maximum Information Content :: " + maxInformationContent[0] / motifLength +" =========\n");
 
         try {
-            Writer.writeSites(sequenceCount, predictedMotifs, predictedSites, outputDirectory + "/predictedsites.txt");
+            Writer.writeSites(sequenceCount, predictedMotifs, predictedSites, outputDirectory + "predictedsites.txt");
+            Writer.writeMotif(sequenceCount, motifMatrix, outputDirectory + "predictedmotif.txt", icpc);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {

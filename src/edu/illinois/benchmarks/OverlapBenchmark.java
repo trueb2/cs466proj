@@ -1,5 +1,7 @@
 package edu.illinois.benchmarks;
 
+import edu.illinois.tests.GibbsSamplerTest;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Scanner;
@@ -9,10 +11,17 @@ import java.util.Scanner;
  */
 public class OverlapBenchmark extends Benchmark {
 
-    public OverlapBenchmark(String outputDirectory, int motifLength) throws FileNotFoundException {
+    public OverlapBenchmark(String outputDirectory) throws FileNotFoundException {
         super(outputDirectory, "OverlapBenchmark");
-        this.motifLength = motifLength;
+    }
 
+    public static void overlapBenchmark(String outputDirectory) {
+        try {
+            OverlapBenchmark ob = new OverlapBenchmark(outputDirectory);
+            ob.benchmark();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -58,6 +67,7 @@ public class OverlapBenchmark extends Benchmark {
         }
         System.out.println("Number of overlapping motifs: " + numMotifOverlaps);
         System.out.println("Number of matched bases: " + numOverlappingPositions);
+        System.out.println();
     }
 
     private boolean doesOverlap(int sitePos, int predPos) {

@@ -1,6 +1,8 @@
 package edu.illinois;
 
 import edu.illinois.benchmarks.OverlapBenchmark;
+import edu.illinois.benchmarks.PrintSitesBenchmark;
+import edu.illinois.benchmarks.RelativeEntropyBenchmark;
 import edu.illinois.finders.GibbsSampler;
 
 import java.io.FileNotFoundException;
@@ -69,7 +71,9 @@ public class Main {
         gibbsSampler.find();
 
         //run benchmarks
-        OverlapBenchmark ob = new OverlapBenchmark(outDir, gibbsSampler.getMotifLength());
-        ob.benchmark();
+        PrintSitesBenchmark.printSitesBenchmark(outDir);
+        OverlapBenchmark.overlapBenchmark(outDir);
+        RelativeEntropyBenchmark.relativeEntropyBenchmark(outDir);
+
     }
 }

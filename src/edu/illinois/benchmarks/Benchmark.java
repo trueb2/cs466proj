@@ -121,21 +121,4 @@ public abstract class Benchmark {
         motifLength = Integer.parseInt(scanner.nextLine());
         scanner.close();
     }
-
-    public List<String> getMotifs() {
-        return motifs;
-    }
-
-    public void setMotifs(List<String> motifs) {
-        this.motifs = motifs;
-    }
-
-    public List<Integer> getSites() {
-        return sites;
-    }
-
-    public void setSites(List<Integer> sites) {
-        this.sites = sites;
-    }
-
 }

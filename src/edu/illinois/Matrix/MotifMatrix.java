@@ -28,7 +28,7 @@ public class MotifMatrix extends WeightMatrix {
     }
 
     public MotifMatrix(List<List<Integer>> countsLists) {
-        super();
+        super(countsLists);
     }
 
     /**

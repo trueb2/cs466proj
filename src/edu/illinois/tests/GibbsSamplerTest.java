@@ -1,18 +1,14 @@
 package edu.illinois.tests;
 
-import edu.illinois.benchmarks.Benchmark;
 import edu.illinois.benchmarks.OverlapBenchmark;
-import edu.illinois.benchmarks.RelativeEntropy;
+import edu.illinois.benchmarks.PrintSitesBenchmark;
+import edu.illinois.benchmarks.RelativeEntropyBenchmark;
 import edu.illinois.finders.GibbsSampler;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
-import static edu.illinois.SequenceGenerator.generateRandomSequences;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -49,28 +45,15 @@ public class GibbsSamplerTest {
     public void findTest1() {
         GibbsSampler gs = new GibbsSampler("sequences.fa","motiflength.txt", OUTPUT_DIRECTORY);
         gs.find(100, 500, new Random(1));
-        try {
-            Benchmark b = new Benchmark(OUTPUT_DIRECTORY, "PrintBenchmark") {
-                public void benchmark() {
-                    String s = getSites().stream()
-                            .map(i -> i.toString())
-                            .collect(Collectors.joining(" "));
-                    System.out.println(s);
-                }
-            };
-            b.benchmark();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
 
-        try {
-            OverlapBenchmark ob = new OverlapBenchmark(OUTPUT_DIRECTORY,8);
-            ob.benchmark();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        PrintSitesBenchmark.printSitesBenchmark(GibbsSamplerTest.OUTPUT_DIRECTORY);
+
+        OverlapBenchmark.overlapBenchmark(GibbsSamplerTest.OUTPUT_DIRECTORY);
+
+        RelativeEntropyBenchmark.relativeEntropyBenchmark(GibbsSamplerTest.OUTPUT_DIRECTORY);
     }
-//
+
+    //
 //    @Test
 //    public void findTest() {
 //        List<String> seq = generateRandomSequences(5,20);
