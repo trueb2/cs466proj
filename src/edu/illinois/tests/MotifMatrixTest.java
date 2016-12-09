@@ -16,7 +16,7 @@ public class MotifMatrixTest {
     @Test
     public void initCountMatrixTest() {
         MotifMatrix mm = new MotifMatrix(1.5, 10);
-        mm.initCountMatrix(10);
+        mm.initCountMatrix();
         System.out.println(mm);
     }
 

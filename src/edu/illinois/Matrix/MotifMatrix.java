@@ -7,19 +7,35 @@ import java.util.Random;
 
 import static java.util.stream.IntStream.range;
 
-/**
- * Created by Jacob on 12/8/2016.
- */
 public class MotifMatrix extends WeightMatrix {
 
-    public MotifMatrix(double icpc, int ml) {
-        initMotifMatrix(icpc, ml);
+    private int motifLength;
+    private double informationContentPerColumn;
+
+    /**
+     * Creates a countMatrix that may be sampled from where 
+     * columns have informationContentPerColumn information content
+     * and there are motifLength columns
+     * @param informationContentPerColumn, information content per column
+     * @param motifLength, number of columns
+     */
+    public MotifMatrix(double informationContentPerColumn, int motifLength) {
+        this.informationContentPerColumn = informationContentPerColumn;
+        this.motifLength = motifLength;
+        initMatrix();
+        rows = motifLength;
+        cols = 4;
     }
 
-    private void initMotifMatrix(double icpc, int ml) {
-        this.ml = ml;
+    /**
+     * Initializes the countMatrix then randomly
+     * chooses the probabilities based off of the
+     * information content per column
+     */
+    public void initMatrix() {
         initCountMatrix();
-        range(0,ml).parallel().forEach(i -> stochasticGradientDescent(icpc, i));
+        final Random r = new Random();
+        range(0,motifLength).parallel().forEach(i -> stochasticGradientDescent(r, i));
     }
 
     /**
@@ -33,13 +49,11 @@ public class MotifMatrix extends WeightMatrix {
      *     surpassed through taking a step of size 1. If a step of size
      *     greater than 1 surpasses the threshold, then the
      *     epoch will be undone.
-     * @param icpc, information content per column
      * @param idx, row index of motif to perform work on
      */
-    private void stochasticGradientDescent(double icpc, int idx) {
+    private void stochasticGradientDescent(Random r, int idx) {
         int prevStep = countSum / 4 / 1000;
         int step = prevStep > 0 ? prevStep : 5;
-        Random r = new Random();
         int[] row = countMatrix[idx];
         int incIdx = r.nextInt(4);
         double ic = Utils.calcInformationContent(countSum, row);
@@ -47,7 +61,7 @@ public class MotifMatrix extends WeightMatrix {
 
         int decIdx = incIdx;
         while(step > 0) {
-            while (ic < icpc) {
+            while (ic < informationContentPerColumn) {
                 decIdx = pickDecrementIndex(row, incIdx, step);
                 if (decIdx == -1) {
                     prevStep = step;
@@ -61,7 +75,7 @@ public class MotifMatrix extends WeightMatrix {
             }
             prevStep = step;
             step = prevStep / 2;
-            if(ic > icpc) {
+            if(ic > informationContentPerColumn) {
                 row[incIdx] -= step;
                 row[decIdx] += step;
             }
@@ -73,14 +87,14 @@ public class MotifMatrix extends WeightMatrix {
     /**
      * Picks the index in a row that may be decremented without going negative
      * @param row, row of counts
-     * @param ti, target index that may not be decremented
+     * @param targetIdx, target index that may not be decremented
      * @param step, amount of decrement
      * @return index to decrement
      */
-    private int pickDecrementIndex(int[] row, int ti, int step) {
+    private int pickDecrementIndex(int[] row, int targetIdx, int step) {
         ArrayList<Integer> acceptableIndices = new ArrayList<>();
         for(int i = 0; i < row.length; i++) {
-            if(ti == i)
+            if(targetIdx == i)
                 continue;
             if(row[i] - step >= 0)
                 acceptableIndices.add(i);
@@ -96,9 +110,26 @@ public class MotifMatrix extends WeightMatrix {
      * Initializes the countMatrix with the countSum/4 value
      */
     public void initCountMatrix() {
-        countMatrix = new int[ml][4];
+        countMatrix = new int[motifLength][4];
         int initCount = countSum / 4;
-        range(0,ml).parallel().forEach(i ->
+        range(0,motifLength).parallel().forEach(i ->
                 range(0, 4).forEach(j -> countMatrix[i][j] = initCount));
+    }
+
+    /**
+     * Use the weights to randomly select a base ml times to form a sampled motif
+     * @return motif, String
+     */
+    public String sample(Random r) {
+        StringBuilder stringBuilder = new StringBuilder();
+        range(0,motifLength).forEach(i -> {
+            int randomWeight = r.nextInt(countSum);
+            int j = -1, k = 0;
+            do {
+                k += countMatrix[i][++j];
+            } while(k < randomWeight);
+            stringBuilder.append(Utils.ACGT[j]);
+        });
+        return stringBuilder.toString();
     }
 }

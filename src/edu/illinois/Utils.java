@@ -77,7 +77,7 @@ public class Utils {
         return weights.size() - 1;
     }
 
-    static int indexOfBase(char base) {
+    public static int indexOfBase(char base) {
         switch(base) {
             case 'A': return 0;
             case 'C': return 1;

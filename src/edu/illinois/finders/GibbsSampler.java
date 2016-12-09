@@ -44,7 +44,7 @@ public class GibbsSampler extends MotifFinder {
         System.out.println("============= Input Sequences =============");
         sequences.stream().forEach(s -> System.out.println(s));
         System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
-        gibbsSample(maxIterations);
+        gibbsSample(new Random(), maxIterations);
     }
 
     public void find() {
@@ -206,39 +206,40 @@ public class GibbsSampler extends MotifFinder {
      */
     public List<Integer> gibbsSample(Random r, int maxIterations){
         List<Integer> sites = getRandomSites(r);
-        calculateQ();
+        Q = new SequenceMatrix(sequences);
         int i = 0;
         while(i < maxIterations) {
             String z = predictiveUpdateStep(r, i);
             samplingStep(z);
         }
-        // Predictive update step
-        int chosenSeq;
-        double maxQoverP;
-        while(i > 0) {
-            // randomly choose one sequence chosenSeq
-            chosenSeq = rand.nextInt(seqSet.size());
-            // recursively go through every subseq in chosenSeq and find max Q/P for each subSeq
-            maxQoverP =  Double.MIN_VALUE;
-            for ( int recSite = 0; recSite <= seqSet.get(0).length()- motifSize; recSite++ ) {
-                // calculate Q
-                // 1. gen PWM all choosen sites except chosSq
-                // 2. get Log Q
-                double q = genLogProbbyT( seqSet , chosenSeq, recSite , sites,  motifSize);
-                // calculate P
-                // Use background PWM => get Log P
-                double p = LOG_25 * motifSize;
-                // Log Q - Log P (Q/P) is largest then record it
-                // replace the choosen motif sites of chosSq by the largest one
-                if( q - p > maxQoverP){
-                    sites.set(chosenSeq, recSite );
-                    maxQoverP = q - p;
-                }
-            }
-            i--;
-        }
-        return sites;
-    }
+        return null;
+//        // Predictive update step
+//        int chosenSeq;
+//        double maxQoverP;
+//        while(i > 0) {
+//            // randomly choose one sequence chosenSeq
+//            chosenSeq = rand.nextInt(seqSet.size());
+//            // recursively go through every subseq in chosenSeq and find max Q/P for each subSeq
+//            maxQoverP =  Double.MIN_VALUE;
+//            for ( int recSite = 0; recSite <= seqSet.get(0).length()- motifSize; recSite++ ) {
+//                // calculate Q
+//                // 1. gen PWM all choosen sites except chosSq
+//                // 2. get Log Q
+//                double q = genLogProbbyT( seqSet , chosenSeq, recSite , sites,  motifSize);
+//                // calculate P
+//                // Use background PWM => get Log P
+//                double p = LOG_25 * motifSize;
+//                // Log Q - Log P (Q/P) is largest then record it
+//                // replace the choosen motif sites of chosSq by the largest one
+//                if( q - p > maxQoverP){
+//                    sites.set(chosenSeq, recSite );
+//                    maxQoverP = q - p;
+//                }
+//            }
+//            i--;
+//        }
+//        return sites;
+//    }
 
 
     /**
