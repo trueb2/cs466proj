@@ -1,6 +1,7 @@
 package edu.illinois.finders;
 import edu.illinois.Matrix.SequenceMatrix;
 import edu.illinois.Matrix.WeightMatrix;
+import edu.illinois.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,7 @@ import java.util.stream.IntStream;
  */
 public class GibbsSampler extends MotifFinder {
 
-    private final double LOG_25 = Math.log(0.25);
-    private WeightMatrix Q,P;
-    private int maxIterations;
+    private List<Integer> sites;
 
     /**   pseudo code
 *     Load all sequences from *.fa
@@ -53,209 +52,52 @@ public class GibbsSampler extends MotifFinder {
     }
 
     /**
-     * Calculate Information content for input PWM
-     * @param predictedMotif Predicted Motif String set
-     * @return Sets of Gene Sequence String
-     */
-    public double icPredictedMotif(List<String> predictedMotif){
-        List<List<Integer>> pm = getPM(predictedMotif);
-        List<List<Double>> pwm = pm2PWM(pm);
-        double ic = 0;
-        for(int pos = 0; pos < pwm.size(); pos++){
-            for(int b = 0; b < 4; b++){
-                ic += pwm.get(pos).get(b)*( Math.log( pwm.get(pos).get(b) ) - LOG_25);
-            }
-        }
-        return ic;
-    }
-    /**
-     * Randomly choose position in each seq to be motif sites
-     * @param seqSet Sets of Gene Sequence String
-     * @param motifSize motif size
-     * @return Set of int indicate position of motif in each seq
-     */
-    public List<Integer> chooseMotifSites(List<String> seqSet, int motifSize){
-        List<Integer> motifSites = new ArrayList<Integer>();
-        Random rand = new Random(System.currentTimeMillis()); 
-        int ran;
-        for(String motif:seqSet){
-            if(motif.length() >= motifSize ){
-                ran = rand.nextInt( motif.length() - motifSize + 1 );
-                motifSites.add(ran);
-            }else{
-                motifSites.add(-1);
-            }
-        }
-        return motifSites;
-    }
-    /**
-     * Generate probability depending on theta set ( predicted motifs except the chosen seq ) for recSite position in chosen seq
-     * @param seqSet Sets of Gene Sequence String
-     * @param chosenSeq the chosen seq in which finding best subsequence to match theta set
-     * @param sites all start index of predicted motifs in seqSet
-     * @param motifSize motif size
-     * @return Log of Probability based on theta set
-     */
-    public double genLogProbbyT( List<String> seqSet ,int chosenSeq,int recSite ,List<Integer> sites, int motifSize){
-        List<String> thetaSet = new ArrayList<>();
-        for(int i = 0 ; i < seqSet.size(); i++){
-            if(i != chosenSeq){
-                thetaSet.add( seqSet.get(i).substring(sites.get(i),sites.get(i) + motifSize ) );
-            }
-        }
-        List<List<Integer>> pm = getPM( thetaSet );
-        List<List<Double>> pwm = pm2PWM(pm);
-        double prob = 0;
-        for(int pos = 0; pos < motifSize; pos++){
-            if ( seqSet.get(chosenSeq).charAt( recSite + pos ) == 'A' ){
-                prob += Math.log( pwm.get(pos).get(0) );
-            }else if ( seqSet.get(chosenSeq).charAt( recSite + pos ) == 'C' ){
-                prob += Math.log( pwm.get(pos).get(1));
-            }else if ( seqSet.get(chosenSeq).charAt( recSite + pos ) == 'T' ){
-                prob += Math.log( pwm.get(pos).get(2));
-            }else if ( seqSet.get(chosenSeq).charAt( recSite + pos ) == 'G' ){
-                prob += Math.log( pwm.get(pos).get(3));
-            }
-        }
-        return prob;
-    }
-    /**
-     * Generate Probability Weighted Matrix based on Profile Matrix
-     * If sup = 0, assign it a probability < 0.001 to avoid infinity problem
-     * @param pm Profile Matrix
-     * @return PWM list which is a ( List of position to (List of ACTG to Probability) )
-     */
-    public List<List<Double>> pm2PWM(List<List<Integer>> pm) {
-        List<Integer> char2Sup;
-        List<List<Double>> pwm = new ArrayList<>(pm.size());
-        for(int i = 0; i <pm.size();i++ ) pwm.add(new ArrayList());
-        List<Double> prob; // index => 0:A 1:C 2:T 3:G
-        // Profile Matrix to PWM
-        int totalSup = pm.get(0).get(0) +pm.get(0).get(1) +pm.get(0).get(2) +pm.get(0).get(3);
-        for (int pos = 0; pos < pm.size(); pos++) {
-            char2Sup = pm.get(pos);
-            prob = new ArrayList<>(4);
-            for(int i = 0; i <4;i++ ) prob.add(0.0);
-            if(char2Sup.contains(0)){
-                int num_zero = 0;
-                for(int sup =0 ; sup < 4; sup++){
-                    if (char2Sup.get(sup) == 0){
-                        num_zero ++;
-                    }
-                }
-                for(int sup =0 ; sup < 4; sup++){
-                    if (char2Sup.get(sup) == 0){
-                        if(num_zero == 1){
-                            prob.set(sup, ( 3.0/totalSup/1000 ));
-                        }else if(num_zero == 2){
-                            prob.set(sup, ( 1.0/totalSup/1000 ));
-                        }else{
-                            prob.set(sup, ( 1.0/totalSup/1000 ));
-                        }
-                    }else{
-                        if(num_zero == 1){
-                            prob.set(sup, ( (double)(char2Sup.get(sup) * 1000 - 1)/totalSup/1000));
-                        }else if(num_zero == 2){
-                            prob.set(sup, ( (double)(char2Sup.get(sup) * 1000 - 1)/totalSup/1000));
-                        }else{
-                            prob.set(sup, ( (double)(char2Sup.get(sup) * 1000 - 3)/totalSup/1000));
-                        }
-                    }
-                }
-            }else{
-                for(int charNum = 0; charNum < 4; charNum++){
-                    prob.set(charNum, ( (double)char2Sup.get(charNum) /totalSup ) );
-                }
-            }
-            pwm.set(pos,prob);
-        }
-        return pwm;
-    }
-
-    /**
-     * Generate Profile Matrix according to theta set for each position
-     * @param seqIn  predicted motifs String set (not index Set)
-     * @return Profile Matrix list ( List of position to (List of ACTG to Sup) )
-     */
-    public List<List<Integer>> getPM(List<String> seqIn) {
-        List<List<Integer>> pos2CharNSup = new ArrayList<>( seqIn.get(0).length() );
-        for(int i = 0; i <seqIn.get(0).length();i++ ) pos2CharNSup.add(new ArrayList());
-        List<Integer> char2Sup; // index => 0:A 1:C 2:T 3:G
-        // accu ATCG Info by position of motif ( Profile Matrix )
-        for (int pos = 0; pos < seqIn.get(0).length(); pos++) {
-            char2Sup = new ArrayList();
-            for(int i = 0 ; i < 4 ; i ++) char2Sup.add(0);
-            for (int seq = 0; seq < seqIn.size(); seq++) {
-                if(seqIn.get(seq).charAt(  pos ) == 'A'){
-                    char2Sup.set(0, char2Sup.get(0)+1 );
-                }else if(seqIn.get(seq).charAt( pos ) == 'C'){
-                    char2Sup.set(1, char2Sup.get(1)+1 );
-                }else if(seqIn.get(seq).charAt( pos ) == 'T'){
-                    char2Sup.set(2, char2Sup.get(2)+1 );
-                }else if(seqIn.get(seq).charAt( pos ) == 'G'){
-                    char2Sup.set(3, char2Sup.get(3)+1 );
-                }
-            }
-            pos2CharNSup.set(pos,char2Sup);
-        }
-        return pos2CharNSup;
-    }
-    /**
      * Implements the Gibbs Sampling algorithm found in the lawrence93.pdf
      * @param maxIterations, maximum number of iterations sampling may take
      * @return Sets of int predicting the position motifs located in each sequence
      */
     public List<Integer> gibbsSample(Random r, int maxIterations) {
-        List<Integer> sites = getRandomSites(r);
-        SequenceMatrix Q = new SequenceMatrix(sequences);
-        SequenceMatrix P = new SequenceMatrix(sequenceLength);
+        sites = getRandomSites(r);
         int i = 0;
         while (i < maxIterations) {
-            String z = predictiveUpdateStep(r, i);
-            samplingStep(z);
-        }
-        return null;
-    }
-//        // Predictive update step
-//        int chosenSeq;
-//        double maxQoverP;
-//        while(i > 0) {
-//            // randomly choose one sequence chosenSeq
-//            chosenSeq = rand.nextInt(seqSet.size());
-//            // recursively go through every subseq in chosenSeq and find max Q/P for each subSeq
-//            maxQoverP =  Double.MIN_VALUE;
-//            for ( int recSite = 0; recSite <= seqSet.get(0).length()- motifSize; recSite++ ) {
-//                // calculate Q
-//                // 1. gen PWM all choosen sites except chosSq
-//                // 2. get Log Q
-//                double q = genLogProbbyT( seqSet , chosenSeq, recSite , sites,  motifSize);
-//                // calculate P
-//                // Use background PWM => get Log P
-//                double p = LOG_25 * motifSize;
-//                // Log Q - Log P (Q/P) is largest then record it
-//                // replace the choosen motif sites of chosSq by the largest one
-//                if( q - p > maxQoverP){
-//                    sites.set(chosenSeq, recSite );
-//                    maxQoverP = q - p;
-//                }
-//            }
-//            i--;
-//        }
-//        return sites;
-//    }
+            // Choose the next sequence
+            int idx = r.nextInt(sequenceLength);
+            String z = sequences.get(idx);
 
+            // Remove the sequence from the sequences and sites
+            sequences.remove(idx);
+            sites.remove(idx);
+
+            // Run the predictive step on z
+            SequenceMatrix q_ij = predictiveUpdateStep(z);
+
+            // Run the sampling step on q_ij
+            int a_z = samplingStep(q_ij, z);
+
+            // Add z back into the set of sequences and sites
+            sequences.add(z);
+            sites.add(a_z);
+        }
+        return sites;
+    }
 
     /**
      * One of the sequenceLength sequences, z,
-     * is chosen either at random or in specified order.
+     * is chosen either at random
      * The pattern description q_{i,j} frequency is
      * then calculated from the current positions a_k
      * in all sequences excluding z
-     * @param i
+     * @param z, sequence chosen for step
      */
-    private String predictiveUpdateStep(Random r, int i) {
-        String z = getRandomSequence(r);
-        return z;
+    private SequenceMatrix predictiveUpdateStep(String z) {
+        // Compute q_{i,j} from the current positions a_k
+        List<String> a = IntStream.range(0,sequenceCount-1).mapToObj(i -> {
+           int site = sites.get(i);
+           String sequence = sequences.get(i);
+           return sequence.substring(site, site + motifLength);
+        }).collect(Collectors.toList());
+        SequenceMatrix q_ij = new SequenceMatrix(a);
+        return q_ij;
     }
 
     /**
@@ -268,17 +110,21 @@ public class GibbsSampler extends MotifFinder {
      * Its position then becomes the new a_z.
      * @param z, sequence we are iterating through
      */
-    private void samplingStep(String z) {
+    private int samplingStep(SequenceMatrix q_ij, String z) {
+        List<Double> Q = IntStream.range(0,sequenceLength)
+                .parallel()
+                .mapToObj(x -> calculateMotifProbability(q_ij, z, x))
+                .collect(Collectors.toList());
+        Double maxQ_x = Q.stream().reduce(Double.MIN_VALUE, Math::max);
+        double a_x =  Q.stream().reduce(0.0, (a,b) -> a == maxQ_x ? a : b);
+        return (int) a_x;
     }
 
-    /**
-     * Gets a random sequence from sequences using the
-     * random object supplied
-     * @param r, random object
-     * @return sequence from sequences
-     */
-    private String getRandomSequence(Random r) {
-        return sequences.get(r.nextInt(sequenceLength));
+    private Double calculateMotifProbability(SequenceMatrix q_ij, String z, int x) {
+        return IntStream.range(0,motifLength)
+                .mapToObj(i -> q_ij.probability(i, Utils.indexOfBase(z.charAt(x + i))))
+                .map(p -> Math.log(p))
+                .reduce(0.0, (a, b) -> a + b);
     }
 
     /**

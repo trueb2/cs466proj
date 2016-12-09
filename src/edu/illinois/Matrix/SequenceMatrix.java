@@ -14,6 +14,7 @@ public class SequenceMatrix extends WeightMatrix {
     public SequenceMatrix(List<String> sequences) {
         this.sequences = sequences;
         this.sequenceCount = sequences.size();
+        countSum = sequenceCount;
         this.sequenceLength = sequences.get(0).length();
         initMatrix(sequenceLength, 4);
         initSequenceMatrix();
@@ -42,5 +43,14 @@ public class SequenceMatrix extends WeightMatrix {
                 countMatrix[j][b]++;
             });
         });
+    }
+
+    /**
+     * Returns the probability of seeing the base in the index
+     * @param index, index of base
+     * @param base, base in the index
+     */
+    public double probability(int index, int base) {
+        return ((double) countMatrix[index][base]) / ((double) countSum);
     }
 }
