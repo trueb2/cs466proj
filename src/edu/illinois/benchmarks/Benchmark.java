@@ -11,24 +11,23 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public abstract class Benchmark {
-    String BENCHMARK;
-    String outputDirectory;
-    List<String> motifs;
-    List<String> predictedMotifs;
+    private String BENCHMARK;
+    private List<String> motifs;
+    private List<String> predictedMotifs;
     List<Integer> sites;
     List<Integer> predictedSites;
-    MotifMatrix motifMatrix;
-    MotifMatrix predictedMotifMatrix;
+    private MotifMatrix motifMatrix;
+    private MotifMatrix predictedMotifMatrix;
+    String outputDirectory;
     int motifLength;
 
-    public Benchmark(String outputDirectory, String BENCHMARK) throws FileNotFoundException {
+    Benchmark(String outputDirectory, String BENCHMARK) throws FileNotFoundException {
         this.outputDirectory = outputDirectory;
 
         //read sequence information
         readMotifFile(false);
         readSitesFile(false);
         readMotifLengthFile();
-//        readSequencesFile();
 
         //read predictions
         readMotifFile(true);
@@ -47,7 +46,7 @@ public abstract class Benchmark {
     /**
      * Prints the name of the benchmark being performed
      */
-    public void printBenchmarkName() {
+    private void printBenchmarkName() {
         System.out.println("Performing :: " + BENCHMARK);
     }
 
@@ -68,8 +67,7 @@ public abstract class Benchmark {
             if(line.startsWith("<"))
                 break;
             String[] split = line.split(" ");
-            List<Integer> counts = Arrays.asList(split)
-                    .stream()
+            List<Integer> counts = Arrays.stream(split)
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
             countsLists.add(counts);
@@ -89,7 +87,7 @@ public abstract class Benchmark {
      * Reads in the sites file
      * @param predicted, which file to read and field members to set
      */
-    public void readSitesFile(boolean predicted) throws FileNotFoundException {
+    private void readSitesFile(boolean predicted) throws FileNotFoundException {
         String fileName = predicted ? "/predictedsites.txt" : "/sites.txt";
 
         List<String> motifs = new ArrayList<>();
@@ -114,11 +112,39 @@ public abstract class Benchmark {
 
     /**
      * Reads the length of the motif from a file
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException, must have motiflength.txt file
      */
     private void readMotifLengthFile() throws FileNotFoundException {
         Scanner scanner = new Scanner(new FileReader(outputDirectory + "/motiflength.txt"));
         motifLength = Integer.parseInt(scanner.nextLine());
         scanner.close();
+    }
+
+    public List<String> getMotifs() {
+        return motifs;
+    }
+
+    public List<String> getPredictedMotifs() {
+        return predictedMotifs;
+    }
+
+    public List<Integer> getSites() {
+        return sites;
+    }
+
+    public List<Integer> getPredictedSites() {
+        return predictedSites;
+    }
+
+    public MotifMatrix getMotifMatrix() {
+        return motifMatrix;
+    }
+
+    public MotifMatrix getPredictedMotifMatrix() {
+        return predictedMotifMatrix;
+    }
+
+    public int getMotifLength() {
+        return motifLength;
     }
 }

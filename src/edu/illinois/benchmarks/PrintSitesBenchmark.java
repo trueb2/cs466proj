@@ -15,7 +15,7 @@ public class PrintSitesBenchmark extends Benchmark {
         }
     }
 
-    public PrintSitesBenchmark(String outputDirectory) throws FileNotFoundException {
+    private PrintSitesBenchmark(String outputDirectory) throws FileNotFoundException {
         super(outputDirectory, "PrintBenchmark");
     }
 
@@ -25,15 +25,15 @@ public class PrintSitesBenchmark extends Benchmark {
 
         sb.append("============Actual==============\n");
         String actual = sites.stream()
-                .map(i -> i.toString())
+                .map(Object::toString)
                 .collect(Collectors.joining(" "));
-        sb.append(actual + "\n");
+        sb.append(actual).append("\n");
 
         sb.append("============Predicted==============\n");
         String predicted = predictedSites.stream()
-                .map(i -> i.toString())
+                .map(Object::toString)
                 .collect(Collectors.joining(" "));
-        sb.append(predicted + "\n");
+        sb.append(predicted).append("\n");
 
         System.out.println(sb.toString());
     }

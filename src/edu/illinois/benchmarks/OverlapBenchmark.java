@@ -1,17 +1,12 @@
 package edu.illinois.benchmarks;
 
-import edu.illinois.tests.GibbsSamplerTest;
-
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Scanner;
 
-/**
- * Created by muzam on 12/3/2016.
- */
 public class OverlapBenchmark extends Benchmark {
 
-    public OverlapBenchmark(String outputDirectory) throws FileNotFoundException {
+    private OverlapBenchmark(String outputDirectory) throws FileNotFoundException {
         super(outputDirectory, "OverlapBenchmark");
     }
 

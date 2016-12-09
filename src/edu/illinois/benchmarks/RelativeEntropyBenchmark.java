@@ -4,12 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Scanner;
 
-/**
- * Created by muzam on 12/5/2016.
- */
 public class RelativeEntropyBenchmark extends Benchmark {
     
-    public RelativeEntropyBenchmark(String outputDirectory) throws FileNotFoundException {
+    private RelativeEntropyBenchmark(String outputDirectory) throws FileNotFoundException {
         super(outputDirectory, "RelativeEntropyBenchmark");
     }
 
@@ -32,8 +29,8 @@ public class RelativeEntropyBenchmark extends Benchmark {
         try {
             Scanner accMotifScan = new Scanner(new FileReader(outputDirectory + "motif.txt"));
             Scanner predMotifScan = new Scanner(new FileReader(outputDirectory + "predictedmotif.txt"));
-            String accHolder = accMotifScan.nextLine();
-            String predHolder = predMotifScan.nextLine();
+            accMotifScan.nextLine();
+            predMotifScan.nextLine();
             for (int i = 0; i < motifLength; i++) {
                 int accBaseTotal = 0;
                 int predBaseTotal = 0;
