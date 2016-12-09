@@ -65,7 +65,7 @@ public class Main {
 
         //perform motif finding
         GibbsSampler gibbsSampler = new GibbsSampler(fastaFileName, motifLengthFileName, outDir);
-        gibbsSampler.find(10);
+        gibbsSampler.find();
 
         //run benchmarks
     }

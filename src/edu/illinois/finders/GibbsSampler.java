@@ -6,6 +6,7 @@ import edu.illinois.Utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -40,15 +41,20 @@ public class GibbsSampler extends MotifFinder {
 
     }
 
-    public void find(int maxIterations) {
+    public void find(int maxIterations, Random r) {
         System.out.println("============= Input Sequences =============");
         sequences.stream().forEach(s -> System.out.println(s));
         System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
-        gibbsSample(new Random(), maxIterations);
+        List<Integer> predictedSites = gibbsSample(r, maxIterations);
+        String s = predictedSites.stream()
+                .map(i -> i.toString())
+                .collect(Collectors.joining(" "));
+        System.out.println(s);
+        System.out.println("==============Actual==============");
     }
 
     public void find() {
-        find(100);
+        find(10000, new Random());
     }
 
     /**
@@ -59,9 +65,9 @@ public class GibbsSampler extends MotifFinder {
     public List<Integer> gibbsSample(Random r, int maxIterations) {
         sites = getRandomSites(r);
         int i = 0;
-        while (i < maxIterations) {
+        while (i++ < maxIterations) {
             // Choose the next sequence
-            int idx = r.nextInt(sequenceLength);
+            int idx = r.nextInt(sequenceCount);
             String z = sequences.get(idx);
 
             // Remove the sequence from the sequences and sites
@@ -111,13 +117,14 @@ public class GibbsSampler extends MotifFinder {
      * @param z, sequence we are iterating through
      */
     private int samplingStep(SequenceMatrix q_ij, String z) {
-        List<Double> Q = IntStream.range(0,sequenceLength)
+        List<Double> Q = IntStream.range(0,sequenceLength-motifLength)
                 .parallel()
                 .mapToObj(x -> calculateMotifProbability(q_ij, z, x))
                 .collect(Collectors.toList());
-        Double maxQ_x = Q.stream().reduce(Double.MIN_VALUE, Math::max);
-        double a_x =  Q.stream().reduce(0.0, (a,b) -> a == maxQ_x ? a : b);
-        return (int) a_x;
+        Double maxQ_x = Q.stream().reduce(Double.NEGATIVE_INFINITY, (a, b) -> a > b ? a : b);
+        int a_x = IntStream.range(0,sequenceLength-motifLength)
+                .reduce(0, (a,b) -> Q.get(a).equals(maxQ_x) ? a : b);
+        return a_x;
     }
 
     private Double calculateMotifProbability(SequenceMatrix q_ij, String z, int x) {

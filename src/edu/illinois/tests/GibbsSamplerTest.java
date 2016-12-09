@@ -38,6 +38,11 @@ public class GibbsSamplerTest {
     }
 
 
+    @Test
+    public void findTest1() {
+        GibbsSampler gs = new GibbsSampler("test_sequences.fa","test_motiflength.txt", "out/test/data");
+        gs.find(100, new Random(1));
+    }
 //
 //    @Test
 //    public void findTest() {
