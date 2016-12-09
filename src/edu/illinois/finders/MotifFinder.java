@@ -9,11 +9,27 @@ import java.util.List;
 import java.util.Scanner;
 
 public abstract class MotifFinder {
-    List<String> sequences;
+    public List<String> getSequences() {
+        return sequences;
+    }
+
+    public int getMotifLength() {
+        return motifLength;
+    }
+
+    public int getSequenceLength() {
+        return sequenceLength;
+    }
+
+    public int getSequenceCount() {
+        return sequenceCount;
+    }
+
     int motifLength;
     int sequenceLength;
     int sequenceCount;
     String outputDirectory;
+    List<String> sequences;
 
     public MotifFinder(String fastaFileName, String motifLengthFileName,  String outputDirectory) {
         sequences = readFastaFile(fastaFileName);
