@@ -13,14 +13,15 @@ import static java.util.stream.IntStream.range;
 public class SequenceGenerator {
 
     public static void createAndWrite(double icpc, int ml, int sl, int sc,
+                               Random r,
                                String fastaFileName,
                                String sitesFileName,
                                String motifFileName,
                                String motifLengthFileName) throws FileNotFoundException, UnsupportedEncodingException {
-        List<String> sequences = generateRandomSequences(sc, sl);
+        List<String> sequences = generateRandomSequences(sc, sl, r);
         MotifMatrix motif = generateMotif(icpc, ml);
-        List<String> bindingSites = generateBindingSites(sc, motif);
-        List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(sc, sl, ml, bindingSites, sequences);
+        List<String> bindingSites = generateBindingSites(sc, r, motif);
+        List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(sc, sl, ml, r, bindingSites, sequences);
         Writer.writeSequenceInfo(icpc, ml, sl, sc,
                 fastaFileName,
                 sitesFileName,
@@ -38,10 +39,10 @@ public class SequenceGenerator {
      * Each random sequence has length Sequence Length
      * @param sc, Sequence Count
      * @param sl, Sequence Length
+     * @param r, object that provides randomness
      * @return generateSequences
      */
-    public static List<String> generateRandomSequences(int sc, int sl) {
-        Random r = new Random();
+    public static List<String> generateRandomSequences(int sc, int sl, Random r) {
         return range(0,sc)
                 .mapToObj(i -> Utils.randomBases(sl, r))
                 .collect(Collectors.toList());
@@ -55,29 +56,29 @@ public class SequenceGenerator {
      * @param ml, Motif Length
      * @return motif
      */
-    public static MotifMatrix generateMotif(double icpc, int ml) {
+    private static MotifMatrix generateMotif(double icpc, int ml) {
         return new MotifMatrix(icpc, ml);
     }
 
     /**
      * Generate Strings to plant using the weights in the motif
+     * @param r, object that provides randomness
      * @param motif, the motif that we will plant
      * @return bindingSites
      */
-    public static List<String> generateBindingSites(int sc, MotifMatrix motif) {
-        Random r = new Random();
+    private static List<String> generateBindingSites(int sc, Random r, MotifMatrix motif) {
         return range(0,sc).mapToObj(i -> motif.sample(r)).collect(Collectors.toList());
     }
 
     /**
      * Plants one sampled site at a random location in each sequence.
      * Planting a site means overwriting the substring with the site.
-     * @param sites
-     * @param sequences
+     * @param r, object that provides randomness
+     * @param sites, plants site values by overwriting
+     * @param sequences, sequences to plant motifs in
      * @return plantedSequences, list of pairs of the planted sequence and location of plant
      */
-    public static List<Pair<String,Integer>> plantMotifInSequences(int sc, int sl, int ml, List<String> sites, List<String> sequences) {
-        Random r = new Random();
+    private static List<Pair<String,Integer>> plantMotifInSequences(int sc, int sl, int ml, Random r, List<String> sites, List<String> sequences) {
         int bound = sl - ml;
         return range(0,sc).mapToObj(i -> {
             String sequence = sequences.get(i);

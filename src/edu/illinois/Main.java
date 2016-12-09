@@ -7,6 +7,7 @@ import edu.illinois.finders.GibbsSampler;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.util.Random;
 
 public class Main {
 
@@ -42,7 +43,7 @@ public class Main {
         }
     }
 
-    public static void run(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+    private static void run(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         //information content per column
         double icpc = Double.parseDouble(args[0]);
         //motif length
@@ -61,6 +62,7 @@ public class Main {
 
         //do sequence generation and write out files containing the descriptions
         SequenceGenerator.createAndWrite(icpc, ml, sl, sc,
+                new Random(),
                 outDir + fastaFileName,
                 outDir + sitesFileName,
                 outDir + motifFileName,
