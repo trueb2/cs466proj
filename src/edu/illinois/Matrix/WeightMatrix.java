@@ -39,7 +39,7 @@ public class WeightMatrix {
         }).collect(Collectors.toList());
 
         Integer sum = sumByRow.get(0);
-        boolean allMatch = sumByRow.stream().allMatch(i -> i == sum);
+        boolean allMatch = sumByRow.stream().allMatch(i -> sum.equals(i));
         assert(allMatch);
         this.countsMatrix = countsMatrix;
         this.rowSum = sum;
