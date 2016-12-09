@@ -45,14 +45,14 @@ public class GibbsSampler extends MotifFinder {
 
     }
 
-    public void find(int maxIterations, Random r) {
+    public void find(int maxIterations, int numSamples, Random r) {
         System.out.println("============= Input Sequences =============");
         sequences.stream().forEach(s -> System.out.println(s));
         System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
         List<Integer> predictedSites = new ArrayList<>();
         List<String> predictedMotifs = new ArrayList<>();
         final double[] maxInformationContent = {Double.NEGATIVE_INFINITY};
-        IntStream.range(0,10).forEach(j -> {
+        IntStream.range(0,numSamples).parallel().forEach(j -> {
             List<Integer> sites = gibbsSample(r, maxIterations, new ArrayList<>(sequences));
             String s = sites.stream()
                     .map(i -> i.toString())
@@ -92,7 +92,7 @@ public class GibbsSampler extends MotifFinder {
     }
 
     public void find() {
-        find(100000, new Random());
+        find(10000, 10, new Random());
     }
 
     /**
