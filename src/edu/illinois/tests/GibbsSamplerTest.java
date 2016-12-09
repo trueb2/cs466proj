@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 public class GibbsSamplerTest {
 
-    private static final String OUTPUT_DIRECTORY = "out/data/test/";
+    private static final String OUTPUT_DIRECTORY = "resources/test/";
 
     @Test
     public void readFastaFileTest1() {
