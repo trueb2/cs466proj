@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
  * Created by jwtrueb on 10/21/16.
  */
 public class Utils {
-    static final String[] BASES = { "A", "C", "G", "T" };
+    public static final String[] ACGT = { "A", "C", "G", "T" };
 
     static List<String> getSequenceFromPair(List<Pair<String, Integer>> sequences) {
         return sequences
@@ -33,18 +33,10 @@ public class Utils {
     static String randomBases(int len, Random r) {
         StringBuilder sequence = new StringBuilder(len);
         for(int j = 0; j < len; j++) {
-            sequence.append(BASES[r.nextInt(4)]);
+            sequence.append(ACGT[r.nextInt(4)]);
         }
         return sequence.toString();
 
-    }
-
-    static ArrayList<Integer> randomBindingSites(int sc, int ml) {
-        Random r = new Random();
-        int l = sc - ml;
-        ArrayList<Integer> bindingSites = new ArrayList<>(sc);
-        IntStream.range(0,l).forEach((x) -> bindingSites.add(r.nextInt(l)));
-        return bindingSites;
     }
 
     static double[][] calculatePWM(ArrayList<String> sequences, int ignoredSequence) {
@@ -97,14 +89,7 @@ public class Utils {
         }
     }
 
-    public static int[] without(int[] with, int exclude) {
-        return IntStream.range(0, with.length)
-                .filter(i -> i != exclude)
-                .map(i -> with[i])
-                .toArray();
-    }
-
-    static double calcInformationContent(double countSum, int[] counts) {
+    public static double calcInformationContent(double countSum, int[] counts) {
         double log_2 = Math.log(2);
         DoubleStream probabilities = Arrays.stream(counts).mapToDouble(i -> ((double)i)/countSum);
         return probabilities.map(p -> {

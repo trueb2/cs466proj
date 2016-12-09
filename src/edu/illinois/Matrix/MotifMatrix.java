@@ -1,27 +1,25 @@
-package edu.illinois;
+package edu.illinois.Matrix;
+
+import edu.illinois.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
-import java.util.stream.Collectors;
 
-import static java.util.stream.IntStream.*;
+import static java.util.stream.IntStream.range;
 
 /**
- * Created by jwtrueb on 11/18/16.
+ * Created by Jacob on 12/8/2016.
  */
-public class WeightMatrix {
-    private static final String[] ACGT = { "A", "C", "G", "T" };
-    private int ml;
-    private int[][] countMatrix;
-    private int countSum = 1000000;
+public class MotifMatrix extends WeightMatrix {
 
-    public WeightMatrix(double icpc, int ml) {
+    public MotifMatrix(double icpc, int ml) {
+        initMotifMatrix(icpc, ml);
+    }
+
+    private void initMotifMatrix(double icpc, int ml) {
         this.ml = ml;
-        initCountMatrix(ml);
-        range(0,ml).parallel().forEach(i -> {
-            stochasticGradientDescent(icpc, i);
-        });
+        initCountMatrix();
+        range(0,ml).parallel().forEach(i -> stochasticGradientDescent(icpc, i));
     }
 
     /**
@@ -72,6 +70,13 @@ public class WeightMatrix {
         countMatrix[idx] = row;
     }
 
+    /**
+     * Picks the index in a row that may be decremented without going negative
+     * @param row, row of counts
+     * @param ti, target index that may not be decremented
+     * @param step, amount of decrement
+     * @return index to decrement
+     */
     private int pickDecrementIndex(int[] row, int ti, int step) {
         ArrayList<Integer> acceptableIndices = new ArrayList<>();
         for(int i = 0; i < row.length; i++) {
@@ -87,36 +92,13 @@ public class WeightMatrix {
             return acceptableIndices.get(new Random().nextInt(acceptableIndices.size()));
     }
 
-
-    public void initCountMatrix(int ml) {
+    /**
+     * Initializes the countMatrix with the countSum/4 value
+     */
+    public void initCountMatrix() {
         countMatrix = new int[ml][4];
         int initCount = countSum / 4;
         range(0,ml).parallel().forEach(i ->
                 range(0, 4).forEach(j -> countMatrix[i][j] = initCount));
-    }
-
-    /**
-     * Use the weights to randomly select a base ml times to form a sampled motif
-     * @return motif, String
-     */
-    public String sample(Random r) {
-        StringBuilder stringBuilder = new StringBuilder();
-        range(0,ml).forEach(i -> {
-            int randomWeight = r.nextInt(countSum);
-            int j = -1, k = 0;
-            do {
-                k += countMatrix[i][++j];
-            } while(k < randomWeight);
-            stringBuilder.append(ACGT[j]);
-        });
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public String toString() {
-        return Arrays.asList(countMatrix)
-                .stream()
-                .map(b -> String.format("%d %d %d %d", b[0], b[1], b[2], b[3]))
-                .collect(Collectors.joining("\n"));
     }
 }

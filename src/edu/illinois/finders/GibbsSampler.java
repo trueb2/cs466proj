@@ -1,5 +1,6 @@
 package edu.illinois.finders;
-import java.io.*;
+import edu.illinois.Matrix.WeightMatrix;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,6 +13,7 @@ import java.util.stream.IntStream;
 public class GibbsSampler extends MotifFinder {
 
     private final double LOG_25 = Math.log(0.25);
+    private WeightMatrix Q,P;
     private int maxIterations;
 
     /**   pseudo code
@@ -198,13 +200,19 @@ public class GibbsSampler extends MotifFinder {
         return pos2CharNSup;
     }
     /**
-     * gibbs sampling, recursively choose a seq in seqSet and find best subSeq to match theta set all
+     * Implements the Gibbs Sampling algorithm found in the lawrence93.pdf
      * @param maxIterations, maximum number of iterations sampling may take
      * @return Sets of int predicting the position motifs located in each sequence
      */
-    public List<Integer> gibbsSample(int maxIterations){
-        // randomly choose motif sites for each sequences
-        List<Integer> sites = getRandomSites();
+    public List<Integer> gibbsSample(Random r, int maxIterations){
+        List<Integer> sites = getRandomSites(r);
+        calculateQ();
+        int i = 0;
+        while(i < maxIterations) {
+            String z = predictiveUpdateStep(r, i);
+            samplingStep(z);
+        }
+        // Predictive update step
         int chosenSeq;
         double maxQoverP;
         while(i > 0) {
@@ -232,16 +240,56 @@ public class GibbsSampler extends MotifFinder {
         return sites;
     }
 
-    private List<Integer> getRandomSites() {
-        Random r = new Random();
+
+    /**
+     * One of the sequenceLength sequences, z,
+     * is chosen either at random or in specified order.
+     * The pattern description q_{i,j} frequency is
+     * then calculated from the current positions a_k
+     * in all sequences excluding z
+     * @param i
+     */
+    private String predictiveUpdateStep(Random r, int i) {
+        String z = getRandomSequence(r);
+        return z;
+    }
+
+    /**
+     * Every possible segment of width motifLength within sequence z
+     * is considered as a possible instance of the pattern. The
+     * probabilities Q_x of generating each segment x according to
+     * the current pattern probabilities q_{i,j} are calculated
+     * The weight A_x = Q_x/P_x is assigned to segment x, and
+     * with each segment so weighted, a random one is selected.
+     * Its position then becomes the new a_z.
+     * @param z, sequence we are iterating through
+     */
+    private void samplingStep(String z) {
+    }
+
+    /**
+     * Gets a random sequence from sequences using the
+     * random object supplied
+     * @param r, random object
+     * @return sequence from sequences
+     */
+    private String getRandomSequence(Random r) {
+        return sequences.get(r.nextInt(sequenceLength));
+    }
+
+    /**
+     * Creates a list of sequenceLength random numbers
+     * using the random object supplied
+     * the numbers are from 0 to sequenceLength-motifLength-1 inclusive
+     * @param r, random object
+     * @return sequenceLength random ints
+     */
+    private List<Integer> getRandomSites(Random r) {
         return IntStream
                 .range(0,sequenceCount)
                 .mapToObj(i -> r.nextInt(sequenceLength-motifLength))
                 .collect(Collectors.toList());
     }
-
-    // print out all sites recorded for each sequence
-    // print out motif weighted array by choosen sites
 }
 
 

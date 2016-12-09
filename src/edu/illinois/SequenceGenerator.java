@@ -1,5 +1,6 @@
 package edu.illinois;
 
+import edu.illinois.Matrix.WeightMatrix;
 import javafx.util.Pair;
 
 import java.io.*;
