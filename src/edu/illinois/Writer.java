@@ -64,7 +64,7 @@ public class Writer {
      * @param sitePositions
      * @param filename
      */
-    static void writeSites(int sc, List<String> motifs, ArrayList<Integer> sitePositions, String filename) throws FileNotFoundException, UnsupportedEncodingException {
+    public static void writeSites(int sc, List<String> motifs, List<Integer> sitePositions, String filename) throws FileNotFoundException, UnsupportedEncodingException {
         final PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
         range(0,sc).forEach(i -> printWriter.println(String.format("%s %d", motifs.get(i), sitePositions.get(i))));
         printWriter.close();

@@ -2,10 +2,14 @@ package edu.illinois.finders;
 import edu.illinois.Matrix.SequenceMatrix;
 import edu.illinois.Matrix.WeightMatrix;
 import edu.illinois.Utils;
+import edu.illinois.Writer;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -14,6 +18,8 @@ import java.util.stream.IntStream;
  * Created by jwtrueb on 11/18/16.
  */
 public class GibbsSampler extends MotifFinder {
+
+    public static final double LOG_25 = Math.log(.25);
 
     /**   pseudo code
 *     Load all sequences from *.fa
@@ -43,18 +49,50 @@ public class GibbsSampler extends MotifFinder {
         System.out.println("============= Input Sequences =============");
         sequences.stream().forEach(s -> System.out.println(s));
         System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
-        IntStream.range(0,10).parallel().forEach(j -> {
-            List<Integer> predictedSites = gibbsSample(r, maxIterations, new ArrayList<>(sequences));
-            String s = predictedSites.stream()
+        List<Integer> predictedSites = new ArrayList<>();
+        List<String> predictedMotifs = new ArrayList<>();
+        final double[] maxInformationContent = {Double.NEGATIVE_INFINITY};
+        IntStream.range(0,10).forEach(j -> {
+            List<Integer> sites = gibbsSample(r, maxIterations, new ArrayList<>(sequences));
+            String s = sites.stream()
                     .map(i -> i.toString())
                     .collect(Collectors.joining(" "));
-            System.out.println(s);
+            List<String> motifs = getMotifStrings(sequences, sites);
+            double informationContent = informationContent(motifs);
+            if(informationContent >= maxInformationContent[0]) {
+                maxInformationContent[0] = informationContent;
+                predictedSites.clear();
+                predictedSites.addAll(sites);
+                predictedMotifs.clear();
+                predictedMotifs.addAll(motifs);
+            }
+            System.out.println(informationContent + " :: " + s);
         });
-        System.out.println("==============Actual==============");
+
+        System.out.println("============= End =============");
+
+        try {
+            Writer.writeSites(sequenceCount, predictedMotifs, predictedSites, outputDirectory + "/predictedsites.txt");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private double informationContent(List<String> motifs) {
+        SequenceMatrix sm = new SequenceMatrix(motifs);
+        Double informationContent = IntStream.range(0,motifLength)
+                .mapToDouble(i ->  IntStream.range(0, 4)
+                            .mapToDouble(j -> sm.probability(i, j) * (Math.log(sm.probability(i, j)) - LOG_25))
+                            .filter(d -> !Double.isNaN(d))
+                            .sum())
+                .sum();
+        return informationContent;
     }
 
     public void find() {
-        find(10000, new Random());
+        find(100000, new Random());
     }
 
     /**
@@ -98,13 +136,17 @@ public class GibbsSampler extends MotifFinder {
      */
     private SequenceMatrix predictiveUpdateStep(List<String> S, List<Integer> A) {
         // Compute q_{i,j} from the current positions a_k
-        List<String> a = IntStream.range(0,sequenceCount-1).mapToObj(i -> {
-           int site = A.get(i);
-           String sequence = S.get(i);
-           return sequence.substring(site, site + motifLength);
-        }).collect(Collectors.toList());
+        List<String> a = getMotifStrings(S, A);
         SequenceMatrix q_ij = new SequenceMatrix(a);
         return q_ij;
+    }
+
+    private List<String> getMotifStrings(List<String> S, List<Integer> A) {
+        return IntStream.range(0,S.size()).mapToObj(i -> {
+               int site = A.get(i);
+               String sequence = S.get(i);
+               return sequence.substring(site, site + motifLength);
+            }).collect(Collectors.toList());
     }
 
     /**
@@ -122,10 +164,43 @@ public class GibbsSampler extends MotifFinder {
                 .parallel()
                 .mapToObj(x -> calculateMotifProbability(q_ij, z, x))
                 .collect(Collectors.toList());
-        Double maxQ_x = Q.stream().reduce(Double.NEGATIVE_INFINITY, (a, b) -> a > b ? a : b);
+        List<Double> weightDistribution = smoothProbabilities(Q);
+        Double choice = weightedChooseIndex(weightDistribution);
         int a_x = IntStream.range(0,sequenceLength-motifLength)
-                .reduce(0, (a,b) -> Q.get(a).equals(maxQ_x) ? a : b);
+                .reduce(0, (a,b) -> Q.get(a).equals(choice) ? a : b);
         return a_x;
+    }
+
+    /**
+     * Currently picks the one with the greatest probability but should be
+     * picking randomly from a weighted distribution
+     * @param weightDistribution
+     * @return new index of the site
+     */
+    private Double weightedChooseIndex(List<Double> weightDistribution) {
+        return weightDistribution.stream()
+                    .reduce(Double.NEGATIVE_INFINITY, (a, b) -> a > b ? a : b);
+    }
+
+    /**
+     * Takes Q a list of log probabilities
+     * Replaces negative infinities with 1 less than the minimum log probability
+     * @param Q, log probabilities
+     * @return list of smoothed probabilities
+     */
+    private List<Double> smoothProbabilities(List<Double> Q) {
+        // Find the smallest probability greater than 0
+        BinaryOperator<Double> minExceptInfinity = (a, b) -> a < b && !b.equals(Double.NEGATIVE_INFINITY) ? b : a;
+        Double min = Q.stream().reduce(Double.NEGATIVE_INFINITY, minExceptInfinity);
+
+        // Assert that there is some non zero probability so that we may smooth
+        if(min <= Double.NEGATIVE_INFINITY + 1)
+            return Q.stream().map(a -> -100.0).collect(Collectors.toList());
+        else
+        // Replace the 0 probability indices with (min - 1) log probability
+            return Q.stream()
+                .map(a -> a.equals(Double.NEGATIVE_INFINITY) ? min - 1: a)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -156,47 +231,3 @@ public class GibbsSampler extends MotifFinder {
                 .collect(Collectors.toList());
     }
 }
-
-
-
-
-
-
-
-//    /**
-//     * Calculate motif sites by iteratively running gibbs sampling for @itrTimes Times
-//     * And find the motif set with the highest Information content and return the sites
-//     * @param itrTimes iteration times for gibbs sampling
-//     * @param outputPath Path for output files "predictedmotif.txt" "predictedsites.txt"
-//     * @return Set of motif sites
-//     */
-//    public List<Integer> gibbsSamplingfinder(int itrTimes,String outputPath) {
-//        final List<Integer>[] bestSites = new List[]{new ArrayList<>()};
-//        final List<String>[] bestMotifs = new List[]{new ArrayList<>()};
-//        final double[] bestIC = {Double.MIN_VALUE};
-//        final double[] tempIC = new double[1];
-//
-//        // Run 10 times and Find the best Information Content
-//        IntStream.range(0,itrTimes).parallel().forEach(t -> {
-//            List<Integer> predictedSites = gibbsSamp(sequences, motifLength, 10000);
-//            System.out.println(predictedSites);
-//            ArrayList<String> predictedMotif = new ArrayList<>();
-//            for(int sqIndex = 0; sqIndex < predictedSites.size(); sqIndex++){
-//                predictedMotif.add( sequences.get(sqIndex).substring( predictedSites.get(sqIndex),predictedSites.get(sqIndex)+ motifLength ) );
-//            }
-//            tempIC[0] = icPredictedMotif(predictedMotif);
-//            if(tempIC[0] > bestIC[0]){
-//                bestIC[0] = tempIC[0];
-//                bestMotifs[0] = predictedMotif;
-//                bestSites[0] = predictedSites;
-//            }
-//        });
-//
-//        System.out.println("============= Result of Gibbs Sampling Algorithm with highest Information Content =============");
-//        System.out.println(bestSites[0]);
-//        //Print files
-//        // Collect and Print Data
-//        printFiles(bestSites[0], bestMotifs[0],outputPath);
-//
-//        return bestSites[0];
-//    }
