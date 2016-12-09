@@ -30,7 +30,7 @@ public class PrintSitesBenchmark extends Benchmark {
         sb.append(actual + "\n");
 
         sb.append("============Predicted==============\n");
-        String predicted = sites.stream()
+        String predicted = predictedSites.stream()
                 .map(i -> i.toString())
                 .collect(Collectors.joining(" "));
         sb.append(predicted + "\n");

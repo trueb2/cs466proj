@@ -1,7 +1,5 @@
 package edu.illinois.benchmarks;
 
-import edu.illinois.tests.GibbsSamplerTest;
-
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Scanner;
