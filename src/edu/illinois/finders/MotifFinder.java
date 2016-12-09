@@ -32,15 +32,13 @@ public abstract class MotifFinder {
     List<String> sequences;
 
     public MotifFinder(String fastaFileName, String motifLengthFileName,  String outputDirectory) {
-        sequences = readFastaFile(fastaFileName);
-        motifLength = readMotifLengthFile(motifLengthFileName);
+        sequences = readFastaFile(outputDirectory + fastaFileName);
+        motifLength = readMotifLengthFile(outputDirectory + motifLengthFileName);
         sequenceLength = sequences.get(0).length();
         sequenceCount = sequences.size();
         this.outputDirectory = outputDirectory;
     }
 
-    public MotifFinder() {}
-    
     /**
      * Method implemented by all MotifFinders that
      * will perform the search for the motifs in the sequences

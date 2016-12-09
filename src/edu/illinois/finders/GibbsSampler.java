@@ -15,8 +15,6 @@ import java.util.stream.IntStream;
  */
 public class GibbsSampler extends MotifFinder {
 
-    private List<Integer> sites;
-
     /**   pseudo code
 *     Load all sequences from *.fa
 *     Load length of Motif from size.txt
@@ -45,11 +43,13 @@ public class GibbsSampler extends MotifFinder {
         System.out.println("============= Input Sequences =============");
         sequences.stream().forEach(s -> System.out.println(s));
         System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
-        List<Integer> predictedSites = gibbsSample(r, maxIterations);
-        String s = predictedSites.stream()
-                .map(i -> i.toString())
-                .collect(Collectors.joining(" "));
-        System.out.println(s);
+        IntStream.range(0,10).parallel().forEach(j -> {
+            List<Integer> predictedSites = gibbsSample(r, maxIterations, new ArrayList<>(sequences));
+            String s = predictedSites.stream()
+                    .map(i -> i.toString())
+                    .collect(Collectors.joining(" "));
+            System.out.println(s);
+        });
         System.out.println("==============Actual==============");
     }
 
@@ -62,29 +62,29 @@ public class GibbsSampler extends MotifFinder {
      * @param maxIterations, maximum number of iterations sampling may take
      * @return Sets of int predicting the position motifs located in each sequence
      */
-    public List<Integer> gibbsSample(Random r, int maxIterations) {
-        sites = getRandomSites(r);
+    public List<Integer> gibbsSample(Random r, int maxIterations, List<String> S) {
+        List<Integer> A = getRandomSites(r);
         int i = 0;
         while (i++ < maxIterations) {
             // Choose the next sequence
             int idx = r.nextInt(sequenceCount);
-            String z = sequences.get(idx);
+            String z = S.get(idx);
 
             // Remove the sequence from the sequences and sites
-            sequences.remove(idx);
-            sites.remove(idx);
+            S.remove(idx);
+            A.remove(idx);
 
             // Run the predictive step on z
-            SequenceMatrix q_ij = predictiveUpdateStep(z);
+            SequenceMatrix q_ij = predictiveUpdateStep(S, A);
 
             // Run the sampling step on q_ij
             int a_z = samplingStep(q_ij, z);
 
             // Add z back into the set of sequences and sites
-            sequences.add(z);
-            sites.add(a_z);
+            S.add(idx, z);
+            A.add(idx, a_z);
         }
-        return sites;
+        return A;
     }
 
     /**
@@ -93,13 +93,14 @@ public class GibbsSampler extends MotifFinder {
      * The pattern description q_{i,j} frequency is
      * then calculated from the current positions a_k
      * in all sequences excluding z
-     * @param z, sequence chosen for step
+     * @param S, the sequences other than z
+     * @param A, the sites for the sequences other than z
      */
-    private SequenceMatrix predictiveUpdateStep(String z) {
+    private SequenceMatrix predictiveUpdateStep(List<String> S, List<Integer> A) {
         // Compute q_{i,j} from the current positions a_k
         List<String> a = IntStream.range(0,sequenceCount-1).mapToObj(i -> {
-           int site = sites.get(i);
-           String sequence = sequences.get(i);
+           int site = A.get(i);
+           String sequence = S.get(i);
            return sequence.substring(site, site + motifLength);
         }).collect(Collectors.toList());
         SequenceMatrix q_ij = new SequenceMatrix(a);
@@ -127,6 +128,13 @@ public class GibbsSampler extends MotifFinder {
         return a_x;
     }
 
+    /**
+     * calculates the log probability of a character appearing at a specific index in a motif
+     * @param q_ij, motif weight matrix
+     * @param z, string of characters
+     * @param x, index of site in z
+     * @return log probability
+     */
     private Double calculateMotifProbability(SequenceMatrix q_ij, String z, int x) {
         return IntStream.range(0,motifLength)
                 .mapToObj(i -> q_ij.probability(i, Utils.indexOfBase(z.charAt(x + i))))

@@ -12,7 +12,7 @@ public class RelativeEntropy extends Benchmark {
     String odr;
     int motifLength;
 
-    public RelativeEntropy(String outputDirectory, int motifLength) {
+    public RelativeEntropy(String outputDirectory, int motifLength) throws FileNotFoundException {
         super(outputDirectory);
         odr = outputDirectory;
         this.motifLength = motifLength;

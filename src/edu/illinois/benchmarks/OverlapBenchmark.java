@@ -12,7 +12,7 @@ public class OverlapBenchmark extends Benchmark {
     String odr;
     int motifLength;
 
-    public OverlapBenchmark(String outputDirectory, int motifLength) {
+    public OverlapBenchmark(String outputDirectory, int motifLength) throws FileNotFoundException {
         super(outputDirectory);
         odr = outputDirectory;
         this.motifLength = motifLength;

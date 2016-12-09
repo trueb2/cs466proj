@@ -1,11 +1,16 @@
 package edu.illinois.tests;
 
+import edu.illinois.benchmarks.Benchmark;
+import edu.illinois.benchmarks.OverlapBenchmark;
+import edu.illinois.benchmarks.RelativeEntropy;
 import edu.illinois.finders.GibbsSampler;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static edu.illinois.SequenceGenerator.generateRandomSequences;
 import static org.junit.Assert.assertEquals;
@@ -16,9 +21,11 @@ import static org.junit.Assert.assertTrue;
  */
 public class GibbsSamplerTest {
 
+    public static final String OUTPUT_DIRECTORY = "out/data/test/";
+
     @Test
     public void readFastaFileTest1() {
-        GibbsSampler gs = new GibbsSampler("test_sequences.fa","test_motiflength.txt", "out/test/data");
+        GibbsSampler gs = new GibbsSampler("sequences.fa","motiflength.txt", OUTPUT_DIRECTORY);
         assertEquals(10,gs.getSequenceCount());
         List<String> sequences = gs.getSequences();
         assertEquals("TTTAGGCCTATATTCCTCTTAGTTCGGTATCTGGCGCCGGCACACGTCCCAGAATAATCACCCAAGGG" +
@@ -40,8 +47,28 @@ public class GibbsSamplerTest {
 
     @Test
     public void findTest1() {
-        GibbsSampler gs = new GibbsSampler("test_sequences.fa","test_motiflength.txt", "out/test/data");
-        gs.find(100, new Random(1));
+        GibbsSampler gs = new GibbsSampler("sequences.fa","motiflength.txt", OUTPUT_DIRECTORY);
+        gs.find(10000, new Random(1));
+        try {
+            Benchmark b = new Benchmark(OUTPUT_DIRECTORY) {
+                public void benchmark() {
+                    String s = getSites().stream()
+                            .map(i -> i.toString())
+                            .collect(Collectors.joining(" "));
+                    System.out.println(s);
+                }
+            };
+            b.benchmark();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            OverlapBenchmark ob = new OverlapBenchmark(OUTPUT_DIRECTORY,8);
+            ob.benchmark();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 //
 //    @Test
