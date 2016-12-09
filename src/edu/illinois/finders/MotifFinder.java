@@ -1,6 +1,5 @@
 package edu.illinois.finders;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,25 +12,13 @@ public abstract class MotifFinder {
         return sequences;
     }
 
-    public int getMotifLength() {
-        return motifLength;
-    }
-
-    public int getSequenceLength() {
-        return sequenceLength;
-    }
-
-    public int getSequenceCount() {
-        return sequenceCount;
-    }
-
     int motifLength;
     int sequenceLength;
     int sequenceCount;
     String outputDirectory;
     List<String> sequences;
 
-    public MotifFinder(String fastaFileName, String motifLengthFileName,  String outputDirectory) {
+    MotifFinder(String fastaFileName, String motifLengthFileName, String outputDirectory) {
         sequences = readFastaFile(outputDirectory + fastaFileName);
         motifLength = readMotifLengthFile(outputDirectory + motifLengthFileName);
         sequenceLength = sequences.get(0).length();
@@ -50,7 +37,7 @@ public abstract class MotifFinder {
      * @param fileName path of fa file
      * @return Set of Gene Sequence String
      */
-    public List<String> readFastaFile(String fileName) {
+    private List<String> readFastaFile(String fileName) {
         try {
             Scanner scanner = new Scanner(new FileReader(fileName));
             List<String> sequences = new ArrayList<>();
@@ -80,7 +67,7 @@ public abstract class MotifFinder {
      * @param path path of size file
      * @return int of motif size
      */
-    public int readMotifLengthFile(String path){
+    private int readMotifLengthFile(String path){
         try{
             Scanner scanner = new Scanner(new FileReader(path));
             int size = Integer.valueOf(scanner.nextLine());
@@ -91,12 +78,11 @@ public abstract class MotifFinder {
             return 0;
         }
     }
-    
-    public void setSequences(List<String> sequences) {
-        this.sequences = sequences;
-    }
 
-    public void setMotifLength(int motifLength) {
-        this.motifLength = motifLength;
+    /**
+     * @return the size of the list sequences
+     */
+    public int getSequenceCount() {
+        return sequenceCount;
     }
 }

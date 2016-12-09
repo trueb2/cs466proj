@@ -1,5 +1,5 @@
 package edu.illinois.finders;
-import edu.illinois.Matrix.MotifMatrix;
+
 import edu.illinois.Matrix.SequenceMatrix;
 import edu.illinois.Matrix.WeightMatrix;
 import edu.illinois.Utils;
@@ -12,42 +12,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BinaryOperator;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Created by jwtrueb on 11/18/16.
- */
 public class GibbsSampler extends MotifFinder {
 
-    /**   pseudo code
-*     Load all sequences from *.fa
-*     Load length of Motif from size.txt
-*     randomly choose motif sites (theta set) for each sequences
-*     recursively do the gibbs sampling
-*         randomly choose one sequence as chosen Seq
-*             iteratively go through every possible motif position in chosen Seq
-*                 calculate Q
-*                     1. gen PM and PWM of theta set except chosen Seq
-*                     2. get Q probability based on PWM of theta set
-*                 calculate P
-*                     1. Log 0.25 * motif_length
-*                 Q/P is the largest then record the position to the chosen motif sites
-*     return the motif sites set
-*
-*     ? print out all sites recorded for each sequence
-*     ? print out motif weighted array by choosen sites
-*/
-    public GibbsSampler(String faPath, String motifLengthPath, String outputDirectory) {
-        //Read Files
-        super(faPath, motifLengthPath, outputDirectory);
-
+    public GibbsSampler(String fastaFilePath, String motifLengthPath, String outputDirectory) {
+        super(fastaFilePath, motifLengthPath, outputDirectory);
     }
 
     public void find(int maxIterations, int numSamples, Random r) {
         System.out.println("============= Input Sequences =============");
-        sequences.stream().forEach(s -> System.out.println(s));
+        sequences.forEach(System.out::println);
         System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
         List<Integer> predictedSites = new ArrayList<>();
         List<String> predictedMotifs = new ArrayList<>();
@@ -55,7 +31,7 @@ public class GibbsSampler extends MotifFinder {
         IntStream.range(0,numSamples).parallel().forEach(j -> {
             List<Integer> sites = gibbsSample(r, maxIterations, new ArrayList<>(sequences));
             String s = sites.stream()
-                    .map(i -> i.toString())
+                    .map(Object::toString)
                     .collect(Collectors.joining(" "));
             List<String> motifs = getMotifStrings(sequences, sites);
             double informationContent = informationContent(motifs);
@@ -86,22 +62,19 @@ public class GibbsSampler extends MotifFinder {
         try {
             Writer.writeSites(sequenceCount, predictedMotifs, predictedSites, outputDirectory + "predictedsites.txt");
             Writer.writeMotif(sequenceCount, motifMatrix, outputDirectory + "predictedmotif.txt", icpc);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException | FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
     private double informationContent(List<String> motifs) {
         SequenceMatrix sm = new SequenceMatrix(motifs);
-        Double informationContent = IntStream.range(0,motifLength)
+        return IntStream.range(0,motifLength)
                 .mapToDouble(i ->  IntStream.range(0, 4)
                             .mapToDouble(j -> sm.probability(i, j) * (Math.log(sm.probability(i, j)*4) / Math.log(2)))
                             .filter(d -> !Double.isNaN(d))
                             .sum())
                 .sum();
-        return informationContent;
     }
 
     public void find() {
@@ -113,7 +86,7 @@ public class GibbsSampler extends MotifFinder {
      * @param maxIterations, maximum number of iterations sampling may take
      * @return Sets of int predicting the position motifs located in each sequence
      */
-    public List<Integer> gibbsSample(Random r, int maxIterations, List<String> S) {
+    private List<Integer> gibbsSample(Random r, int maxIterations, List<String> S) {
         List<Integer> A = getRandomSites(r);
         int i = 0;
         while (i++ < maxIterations) {
@@ -151,11 +124,10 @@ public class GibbsSampler extends MotifFinder {
                         .forEach(j -> P[Utils.indexOfBase(S.get(i).charAt(j))]++));
 
         Double sum = Arrays.stream(P).reduce(0, Double::sum);
-        List<Double> backgroundFrequencies = Arrays.stream(P)
+
+        return Arrays.stream(P)
                 .mapToObj(d -> d/sum)
                 .collect(Collectors.toList());
-
-        return backgroundFrequencies;
     }
 
     /**
@@ -170,10 +142,16 @@ public class GibbsSampler extends MotifFinder {
     private SequenceMatrix predictiveUpdateStep(List<String> S, List<Integer> A) {
         // Compute q_{i,j} from the current positions a_k
         List<String> a = getMotifStrings(S, A);
-        SequenceMatrix q_ij = new SequenceMatrix(a);
-        return q_ij;
+        return new SequenceMatrix(a);
     }
 
+    /**
+     * Grabs the motif strings of length motifLength
+     * from each sequence and site
+     * @param S, sequences
+     * @param A, sites
+     * @return sequenceCount motif strings
+     */
     private List<String> getMotifStrings(List<String> S, List<Integer> A) {
         return IntStream.range(0,S.size()).mapToObj(i -> {
                int site = A.get(i);
@@ -199,9 +177,8 @@ public class GibbsSampler extends MotifFinder {
                 .collect(Collectors.toList());
         List<Double> weightDistribution = smoothProbabilities(A);
         Double choice = weightedChooseIndex(weightDistribution);
-        int a_x = IntStream.range(0,sequenceLength-motifLength)
+        return IntStream.range(0,sequenceLength-motifLength)
                 .reduce(0, (a,b) -> A.get(a).equals(choice) ? a : b);
-        return a_x;
     }
 
     /**
@@ -247,7 +224,7 @@ public class GibbsSampler extends MotifFinder {
     /**
      * Currently picks the one with the greatest probability but should be
      * picking randomly from a weighted distribution
-     * @param weightDistribution
+     * @param weightDistribution, sequenceCount smoothed log probabilities
      * @return new index of the site
      */
     private Double weightedChooseIndex(List<Double> weightDistribution) {
