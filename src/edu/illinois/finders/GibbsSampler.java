@@ -3,6 +3,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by jwtrueb on 11/18/16.
@@ -10,6 +12,7 @@ import java.util.Random;
 public class GibbsSampler extends MotifFinder {
 
     private final double LOG_25 = Math.log(0.25);
+    private int maxIterations;
 
     /**   pseudo code
 *     Load all sequences from *.fa
@@ -17,7 +20,7 @@ public class GibbsSampler extends MotifFinder {
 *     randomly choose motif sites (theta set) for each sequences
 *     recursively do the gibbs sampling
 *         randomly choose one sequence as chosen Seq
-*             recursively go through every possible motif position in chosen Seq
+*             iteratively go through every possible motif position in chosen Seq
 *                 calculate Q
 *                     1. gen PM and PWM of theta set except chosen Seq
 *                     2. get Q probability based on PWM of theta set
@@ -32,96 +35,18 @@ public class GibbsSampler extends MotifFinder {
     public GibbsSampler(String faPath, String sizePath, String outputDirectory) {
         //Read Files
         super(faPath, sizePath, outputDirectory);
-    }
-
-    public GibbsSampler(){
 
     }
 
-    /**
-     * Method implemented by all MotifFinders that
-     * will perform the search for the motifs in the sequences
-     */
-    public void find() {
-        find(10000);
-    }
-
-    public void find(int iterations) {
+    public void find(int maxIterations) {
         System.out.println("============= Input Sequences =============");
         sequences.stream().forEach(s -> System.out.println(s));
         System.out.println("============= Result of Gibbs Sampling Algorithm in each iteration =============");
-        // Run Gibbs Sample Algorithm to predict sites
-        List<Integer> bestSites = gibbsSamplingfinder(iterations, outputDirectory);
+        gibbsSample(maxIterations);
     }
 
-    /**
-     * Calculate motif sites by iteratively running gibbs sampling for @itrTimes Times
-     * And find the motif set with the highest Information content and return the sites
-     * @param itrTimes iteration times for gibbs sampling
-     * @param outputPath Path for output files "predictedmotif.txt" "predictedsites.txt"
-     * @return Set of motif sites
-     */
-    public List<Integer> gibbsSamplingfinder(int itrTimes,String outputPath) {
-        List<String> predictedMotif;
-        List<Integer> predictedSites;
-        List<Integer> bestSites = new ArrayList<>();
-        List<String> bestMotifs = new ArrayList<>();
-        double bestIC = Double.MIN_VALUE;
-        double tempIC;
-
-        // Run 10 times and Find the best Information Content
-        for(int times = 0; times < itrTimes; times++){
-            predictedSites = gibbsSamp(sequences, motifLength, 10000);
-            System.out.println(predictedSites);
-            predictedMotif = new ArrayList<>();
-            for(int sqIndex = 0; sqIndex < predictedSites.size(); sqIndex++){
-                predictedMotif.add( sequences.get(sqIndex).substring( predictedSites.get(sqIndex),predictedSites.get(sqIndex)+ motifLength ) );
-            }
-            tempIC = icPredictedMotif(predictedMotif);
-            if(tempIC > bestIC){
-                bestIC = tempIC;
-                bestMotifs = predictedMotif;
-                bestSites = predictedSites;
-            }
-        }
-        System.out.println("============= Result of Gibbs Sampling Algorithm with highest Information Content =============");
-        System.out.println(bestSites);
-        //Print files
-        // Collect and Print Data
-        printFiles(bestSites, bestMotifs,outputPath);
-
-        return bestSites;
-    }
-    /**
-     * Calculate motif sites by iteratively running gibbs sampling for @itrTimes Times
-     * And find the motif set with the highest Information content and return the sites
-     * @param bestSites best sites set found by gibbs sampling
-     * @param bestMotifs best motif string set found by gibbs sampling
-     * @param outputPath Path for output files "predictedmotif.txt" "predictedsites.txt"
-     */
-    private void printFiles(List<Integer> bestSites, List<String> bestMotifs,String outputPath) {
-        try {
-            List<List<Integer>> pm = getPM(bestMotifs);
-            PrintWriter writer = new PrintWriter(outputPath+"predictedmotif.txt", "UTF-8");
-            writer.print(">MOTIF1\t" + motifLength);
-            for (int i = 0; i < pm.size(); i++) {
-                writer.print("\n");
-                for (int sup : pm.get(i)) {
-                    writer.print(sup + "\t");
-                }
-            }
-            writer.print("\n<");
-            writer.close();
-            //updated writing of predictedsites.txt to match sites.txt - muzammil
-            writer = new PrintWriter(outputPath+"predictedsites.txt", "UTF-8");
-            for (int i = 0; i < bestSites.size(); i++) {
-                writer.print(bestMotifs.get(i) + " ");
-                writer.print(bestSites.get(i) + "\n");
-            }
-            writer.close();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+    public void find() {
+        find(100);
     }
 
     /**
@@ -274,19 +199,14 @@ public class GibbsSampler extends MotifFinder {
     }
     /**
      * gibbs sampling, recursively choose a seq in seqSet and find best subSeq to match theta set all
-     * @param seqSet Sets of Gene Sequence String
-     * @param motifSize motif size
-     * @param recTimes iteration times
+     * @param maxIterations, maximum number of iterations sampling may take
      * @return Sets of int predicting the position motifs located in each sequence
      */
-    public List<Integer> gibbsSamp(List<String> seqSet, int motifSize, int recTimes){
+    public List<Integer> gibbsSample(int maxIterations){
         // randomly choose motif sites for each sequences
-        List<Integer> sites = chooseMotifSites(seqSet, motifSize);
-        // recursively do the gibbs sampling
-        int i = recTimes;
+        List<Integer> sites = getRandomSites();
         int chosenSeq;
         double maxQoverP;
-        Random rand = new Random(System.currentTimeMillis());
         while(i > 0) {
             // randomly choose one sequence chosenSeq
             chosenSeq = rand.nextInt(seqSet.size());
@@ -312,6 +232,58 @@ public class GibbsSampler extends MotifFinder {
         return sites;
     }
 
+    private List<Integer> getRandomSites() {
+        Random r = new Random();
+        return IntStream
+                .range(0,sequenceCount)
+                .mapToObj(i -> r.nextInt(sequenceLength-motifLength))
+                .collect(Collectors.toList());
+    }
+
     // print out all sites recorded for each sequence
     // print out motif weighted array by choosen sites
 }
+
+
+
+
+
+
+
+//    /**
+//     * Calculate motif sites by iteratively running gibbs sampling for @itrTimes Times
+//     * And find the motif set with the highest Information content and return the sites
+//     * @param itrTimes iteration times for gibbs sampling
+//     * @param outputPath Path for output files "predictedmotif.txt" "predictedsites.txt"
+//     * @return Set of motif sites
+//     */
+//    public List<Integer> gibbsSamplingfinder(int itrTimes,String outputPath) {
+//        final List<Integer>[] bestSites = new List[]{new ArrayList<>()};
+//        final List<String>[] bestMotifs = new List[]{new ArrayList<>()};
+//        final double[] bestIC = {Double.MIN_VALUE};
+//        final double[] tempIC = new double[1];
+//
+//        // Run 10 times and Find the best Information Content
+//        IntStream.range(0,itrTimes).parallel().forEach(t -> {
+//            List<Integer> predictedSites = gibbsSamp(sequences, motifLength, 10000);
+//            System.out.println(predictedSites);
+//            ArrayList<String> predictedMotif = new ArrayList<>();
+//            for(int sqIndex = 0; sqIndex < predictedSites.size(); sqIndex++){
+//                predictedMotif.add( sequences.get(sqIndex).substring( predictedSites.get(sqIndex),predictedSites.get(sqIndex)+ motifLength ) );
+//            }
+//            tempIC[0] = icPredictedMotif(predictedMotif);
+//            if(tempIC[0] > bestIC[0]){
+//                bestIC[0] = tempIC[0];
+//                bestMotifs[0] = predictedMotif;
+//                bestSites[0] = predictedSites;
+//            }
+//        });
+//
+//        System.out.println("============= Result of Gibbs Sampling Algorithm with highest Information Content =============");
+//        System.out.println(bestSites[0]);
+//        //Print files
+//        // Collect and Print Data
+//        printFiles(bestSites[0], bestMotifs[0],outputPath);
+//
+//        return bestSites[0];
+//    }

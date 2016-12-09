@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import static java.util.stream.IntStream.*;
 
@@ -45,7 +44,7 @@ public class WeightMatrix {
         Random r = new Random();
         int[] row = countMatrix[idx];
         int incIdx = r.nextInt(4);
-        double ic = calcInformationContent(row);
+        double ic = Utils.calcInformationContent(countSum, row);
         assert(ic == 0);
 
         int decIdx = incIdx;
@@ -59,7 +58,7 @@ public class WeightMatrix {
                 } else {
                     row[incIdx] += step;
                     row[decIdx] -= step;
-                    ic = calcInformationContent(row);
+                    ic = Utils.calcInformationContent(countSum, row);
                 }
             }
             prevStep = step;
@@ -68,7 +67,7 @@ public class WeightMatrix {
                 row[incIdx] -= step;
                 row[decIdx] += step;
             }
-            ic = calcInformationContent(row);
+            ic = Utils.calcInformationContent(countSum, row);
         }
         countMatrix[idx] = row;
     }
@@ -86,18 +85,6 @@ public class WeightMatrix {
             return -1;
         else
             return acceptableIndices.get(new Random().nextInt(acceptableIndices.size()));
-    }
-
-    private double calcInformationContent(int[] counts) {
-        double sum = (double) countSum;
-        double log_2 = Math.log(2);
-        DoubleStream probabilities = Arrays.stream(counts).mapToDouble(i -> ((double)i)/sum);
-        return probabilities.map(p -> {
-            if(p == 0)
-                return 0;
-            else
-                return p * (Math.log(p/.25)/log_2);
-        }).sum();
     }
 
 
