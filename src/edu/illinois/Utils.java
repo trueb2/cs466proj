@@ -30,13 +30,8 @@ public class Utils {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    static String randomBases(int len, Random r) {
-        StringBuilder sequence = new StringBuilder(len);
-        for(int j = 0; j < len; j++) {
-            sequence.append(ACGT[r.nextInt(4)]);
-        }
-        return sequence.toString();
-
+    public static String randomBases(int len, Random r) {
+        return IntStream.range(0,len).mapToObj(i -> ACGT[r.nextInt(4)]).collect(Collectors.joining());
     }
 
     static double[][] calculatePWM(ArrayList<String> sequences, int ignoredSequence) {

@@ -3,12 +3,16 @@ package edu.illinois.Matrix;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public abstract class WeightMatrix {
+public class WeightMatrix {
     int rows, cols;
     int[][] countMatrix;
     int countSum = 1000000;
 
-    public abstract void initMatrix();
+    public void initMatrix(int rows, int cols) {
+        countMatrix = new int[rows][cols];
+        setRows(rows);
+        setCols(cols);
+    }
 
     @Override
     public String toString() {

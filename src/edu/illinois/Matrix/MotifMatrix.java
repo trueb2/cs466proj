@@ -22,9 +22,8 @@ public class MotifMatrix extends WeightMatrix {
     public MotifMatrix(double informationContentPerColumn, int motifLength) {
         this.informationContentPerColumn = informationContentPerColumn;
         this.motifLength = motifLength;
-        initMatrix();
-        rows = motifLength;
-        cols = 4;
+        initMatrix(motifLength, 4);
+        initMotifMatrix();
     }
 
     /**
@@ -32,7 +31,7 @@ public class MotifMatrix extends WeightMatrix {
      * chooses the probabilities based off of the
      * information content per column
      */
-    public void initMatrix() {
+    public void initMotifMatrix() {
         initCountMatrix();
         final Random r = new Random();
         range(0,motifLength).parallel().forEach(i -> stochasticGradientDescent(r, i));

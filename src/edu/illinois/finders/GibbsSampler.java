@@ -1,4 +1,5 @@
 package edu.illinois.finders;
+import edu.illinois.Matrix.SequenceMatrix;
 import edu.illinois.Matrix.WeightMatrix;
 
 import java.util.ArrayList;
@@ -204,15 +205,16 @@ public class GibbsSampler extends MotifFinder {
      * @param maxIterations, maximum number of iterations sampling may take
      * @return Sets of int predicting the position motifs located in each sequence
      */
-    public List<Integer> gibbsSample(Random r, int maxIterations){
+    public List<Integer> gibbsSample(Random r, int maxIterations) {
         List<Integer> sites = getRandomSites(r);
-        Q = new SequenceMatrix(sequences);
+        SequenceMatrix Q = new SequenceMatrix(sequences);
         int i = 0;
-        while(i < maxIterations) {
+        while (i < maxIterations) {
             String z = predictiveUpdateStep(r, i);
             samplingStep(z);
         }
         return null;
+    }
 //        // Predictive update step
 //        int chosenSeq;
 //        double maxQoverP;

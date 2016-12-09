@@ -1,6 +1,6 @@
 package edu.illinois;
 
-import edu.illinois.Matrix.WeightMatrix;
+import edu.illinois.Matrix.MotifMatrix;
 import javafx.util.Pair;
 
 import java.io.*;
@@ -18,7 +18,7 @@ public class SequenceGenerator {
                                String motifFileName,
                                String motifLengthFileName) throws FileNotFoundException, UnsupportedEncodingException {
         List<String> sequences = generateRandomSequences(sc, sl);
-        WeightMatrix motif = generateMotif(icpc, ml);
+        MotifMatrix motif = generateMotif(icpc, ml);
         List<String> bindingSites = generateBindingSites(sc, motif);
         List<Pair<String,Integer>> plantedSequences = plantMotifInSequences(sc, sl, ml, bindingSites, sequences);
         Writer.writeSequenceInfo(icpc, ml, sl, sc,
@@ -55,8 +55,8 @@ public class SequenceGenerator {
      * @param ml, Motif Length
      * @return motif
      */
-    public static WeightMatrix generateMotif(double icpc, int ml) {
-        return new WeightMatrix(icpc, ml);
+    public static MotifMatrix generateMotif(double icpc, int ml) {
+        return new MotifMatrix(icpc, ml);
     }
 
     /**
@@ -64,7 +64,7 @@ public class SequenceGenerator {
      * @param motif, the motif that we will plant
      * @return bindingSites
      */
-    public static List<String> generateBindingSites(int sc, WeightMatrix motif) {
+    public static List<String> generateBindingSites(int sc, MotifMatrix motif) {
         Random r = new Random();
         return range(0,sc).mapToObj(i -> motif.sample(r)).collect(Collectors.toList());
     }
@@ -86,17 +86,6 @@ public class SequenceGenerator {
             String end = sequence.substring(idx+ml);
             return new Pair<>(start + sites.get(i) + end, idx);
         }).collect(Collectors.toList());
-    }
-
-    /**
-     * Creates the directory where the files will be written
-     * @param filename, path to a file that needs to be written
-     */
-    private static void initOutputDirectory(String filename) {
-        File file = new File(filename);
-        File parentDir = file.getParentFile();
-        if(parentDir != null)
-            parentDir.mkdirs();
     }
 
 }

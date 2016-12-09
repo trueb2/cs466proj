@@ -3,6 +3,7 @@ package edu.illinois;
 import edu.illinois.Matrix.WeightMatrix;
 import javafx.util.Pair;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -11,9 +12,6 @@ import java.util.List;
 
 import static java.util.stream.IntStream.range;
 
-/**
- * Created by Jacob on 12/8/2016.
- */
 public class Writer {
     /**
      * Writes all of the files that need to be written
@@ -33,7 +31,7 @@ public class Writer {
      */
     public static void writeSequenceInfo(double icpc, int ml, int sl, int sc, String fastaFileName, String sitesFileName, String motifFileName, String motifLengthFileName, WeightMatrix motif, List<String> bindingSites, List<Pair<String, Integer>> plantedSequences) throws FileNotFoundException, UnsupportedEncodingException {
         //Create the output directory
-        SequenceGenerator.initOutputDirectory(fastaFileName);
+        initOutputDirectory(fastaFileName);
 
         //Write files in the new directory
         writeFasta(sc, Utils.getSequenceFromPair(plantedSequences), fastaFileName);
@@ -95,5 +93,16 @@ public class Writer {
         PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
         printWriter.println(ml);
         printWriter.close();
+    }
+
+    /**
+     * Creates the directory where the files will be written
+     * @param filename, path to a file that needs to be written
+     */
+    static void initOutputDirectory(String filename) {
+        File file = new File(filename);
+        File parentDir = file.getParentFile();
+        if(parentDir != null)
+            parentDir.mkdirs();
     }
 }
