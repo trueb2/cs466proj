@@ -48,7 +48,7 @@ public class GibbsSamplerTest {
     @Test
     public void findTest1() {
         GibbsSampler gs = new GibbsSampler("sequences.fa","motiflength.txt", OUTPUT_DIRECTORY);
-        gs.find(10000, 500, new Random(1));
+        gs.find(100, 500, new Random(1));
         try {
             Benchmark b = new Benchmark(OUTPUT_DIRECTORY) {
                 public void benchmark() {

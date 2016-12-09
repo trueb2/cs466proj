@@ -84,7 +84,7 @@ public class GibbsSampler extends MotifFinder {
         SequenceMatrix sm = new SequenceMatrix(motifs);
         Double informationContent = IntStream.range(0,motifLength)
                 .mapToDouble(i ->  IntStream.range(0, 4)
-                            .mapToDouble(j -> sm.probability(i, j) * (Math.log(sm.probability(i, j)) - LOG_25))
+                            .mapToDouble(j -> sm.probability(i, j) * (Math.log(sm.probability(i, j)*4)/Math.log(2)))
                             .filter(d -> !Double.isNaN(d))
                             .sum())
                 .sum();
