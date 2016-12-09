@@ -1,5 +1,6 @@
 package edu.illinois;
 
+import edu.illinois.benchmarks.OverlapBenchmark;
 import edu.illinois.finders.GibbsSampler;
 
 import java.io.FileNotFoundException;
@@ -10,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         if(args.length == 0) {
             //default
-            Double icpc = 2.0;
+            Double icpc = 1.5;
             Integer ml = 8;
             Integer sc = 10;
             Integer sl = 500;
@@ -51,22 +52,24 @@ public class Main {
 
         //output file locations
         String outDir = String.format("out/data/seq_%.1f_%d_%d_%d/", icpc, ml, sl, sc);
-        String fastaFileName = outDir + "sequences.fa";
-        String sitesFileName = outDir + "sites.txt";
-        String motifFileName = outDir + "motif.txt";
-        String motifLengthFileName = outDir + "motiflength.txt";
+        String fastaFileName = "sequences.fa";
+        String sitesFileName = "sites.txt";
+        String motifFileName = "motif.txt";
+        String motifLengthFileName = "motiflength.txt";
 
         //do sequence generation and write out files containing the descriptions
         SequenceGenerator.createAndWrite(icpc, ml, sl, sc,
-                fastaFileName,
-                sitesFileName,
-                motifFileName,
-                motifLengthFileName);
+                outDir + fastaFileName,
+                outDir + sitesFileName,
+                outDir + motifFileName,
+                outDir + motifLengthFileName);
 
         //perform motif finding
         GibbsSampler gibbsSampler = new GibbsSampler(fastaFileName, motifLengthFileName, outDir);
         gibbsSampler.find();
 
         //run benchmarks
+        OverlapBenchmark ob = new OverlapBenchmark(outDir, gibbsSampler.getMotifLength());
+        ob.benchmark();
     }
 }

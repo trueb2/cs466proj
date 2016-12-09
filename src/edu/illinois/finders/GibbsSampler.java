@@ -39,9 +39,9 @@ public class GibbsSampler extends MotifFinder {
 *     ? print out all sites recorded for each sequence
 *     ? print out motif weighted array by choosen sites
 */
-    public GibbsSampler(String faPath, String sizePath, String outputDirectory) {
+    public GibbsSampler(String faPath, String motifLengthPath, String outputDirectory) {
         //Read Files
-        super(faPath, sizePath, outputDirectory);
+        super(faPath, motifLengthPath, outputDirectory);
 
     }
 
@@ -59,17 +59,27 @@ public class GibbsSampler extends MotifFinder {
                     .collect(Collectors.joining(" "));
             List<String> motifs = getMotifStrings(sequences, sites);
             double informationContent = informationContent(motifs);
-            if(informationContent >= maxInformationContent[0]) {
-                maxInformationContent[0] = informationContent;
-                predictedSites.clear();
-                predictedSites.addAll(sites);
-                predictedMotifs.clear();
-                predictedMotifs.addAll(motifs);
+            boolean newMax;
+            synchronized (maxInformationContent) {
+                newMax = informationContent >= maxInformationContent[0];
+            }
+            if(newMax) {
+                synchronized (maxInformationContent) {
+                    maxInformationContent[0] = informationContent;
+                }
+                synchronized (predictedSites) {
+                    predictedSites.clear();
+                    predictedSites.addAll(sites);
+                }
+                synchronized (predictedMotifs) {
+                    predictedMotifs.clear();
+                    predictedMotifs.addAll(motifs);
+                }
             }
             System.out.println(informationContent + " :: " + s);
         });
 
-        System.out.println("============= End =============");
+        System.out.println("======== Maximum Information Content :: " + maxInformationContent[0] / motifLength +" =========");
 
         try {
             Writer.writeSites(sequenceCount, predictedMotifs, predictedSites, outputDirectory + "/predictedsites.txt");
@@ -84,7 +94,7 @@ public class GibbsSampler extends MotifFinder {
         SequenceMatrix sm = new SequenceMatrix(motifs);
         Double informationContent = IntStream.range(0,motifLength)
                 .mapToDouble(i ->  IntStream.range(0, 4)
-                            .mapToDouble(j -> sm.probability(i, j) * (Math.log(sm.probability(i, j)*4)/Math.log(2)))
+                            .mapToDouble(j -> sm.probability(i, j) * (Math.log(sm.probability(i, j)*4) / Math.log(2)))
                             .filter(d -> !Double.isNaN(d))
                             .sum())
                 .sum();
@@ -92,7 +102,7 @@ public class GibbsSampler extends MotifFinder {
     }
 
     public void find() {
-        find(10000, 10, new Random());
+        find(500, sequenceLength, new Random());
     }
 
     /**
