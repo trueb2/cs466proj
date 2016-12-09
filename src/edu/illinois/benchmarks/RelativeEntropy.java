@@ -13,7 +13,7 @@ public class RelativeEntropy extends Benchmark {
     int motifLength;
 
     public RelativeEntropy(String outputDirectory, int motifLength) throws FileNotFoundException {
-        super(outputDirectory);
+        super(outputDirectory, "RelativeEntropyBenchmark");
         odr = outputDirectory;
         this.motifLength = motifLength;
     }
@@ -61,7 +61,7 @@ public class RelativeEntropy extends Benchmark {
             e.printStackTrace();
         }
 
-        System.out.println("Posiitonal relative entropy values = ");
+        System.out.println("Positional relative entropy values = ");
         printDoubles(posRelEntropy);
         System.out.println();
         System.out.println("Total relative entropy D(acc|predicted) = ");

@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         if(args.length == 0) {
             //default
-            Double icpc = 1.5;
+            Double icpc = 2.0;
             Integer ml = 8;
             Integer sc = 10;
             Integer sl = 500;

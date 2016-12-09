@@ -7,6 +7,7 @@ import edu.illinois.Writer;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BinaryOperator;
@@ -18,8 +19,6 @@ import java.util.stream.IntStream;
  * Created by jwtrueb on 11/18/16.
  */
 public class GibbsSampler extends MotifFinder {
-
-    public static final double LOG_25 = Math.log(.25);
 
     /**   pseudo code
 *     Load all sequences from *.fa
@@ -124,15 +123,35 @@ public class GibbsSampler extends MotifFinder {
 
             // Run the predictive step on z
             SequenceMatrix q_ij = predictiveUpdateStep(S, A);
+            List<Double> P = calculateP(S);
 
             // Run the sampling step on q_ij
-            int a_z = samplingStep(q_ij, z);
+            int a_z = samplingStep(q_ij, z, P);
 
             // Add z back into the set of sequences and sites
             S.add(idx, z);
             A.add(idx, a_z);
         }
         return A;
+    }
+
+    /**
+     * Calculates the background probabilities for each base
+     * @param S, sequenceCount sequences
+     * @return List of Double length 4
+     */
+    private List<Double> calculateP(List<String> S) {
+        double[] P = { 0, 0, 0, 0 };
+        IntStream.range(0,sequenceCount-1)
+                .forEach(i -> IntStream.range(0,sequenceLength)
+                        .forEach(j -> P[Utils.indexOfBase(S.get(i).charAt(j))]++));
+
+        Double sum = Arrays.stream(P).reduce(0, Double::sum);
+        List<Double> backgroundFrequencies = Arrays.stream(P)
+                .mapToObj(d -> d/sum)
+                .collect(Collectors.toList());
+
+        return backgroundFrequencies;
     }
 
     /**
@@ -169,16 +188,56 @@ public class GibbsSampler extends MotifFinder {
      * Its position then becomes the new a_z.
      * @param z, sequence we are iterating through
      */
-    private int samplingStep(SequenceMatrix q_ij, String z) {
-        List<Double> Q = IntStream.range(0,sequenceLength-motifLength)
+    private int samplingStep(SequenceMatrix q_ij, String z, List<Double> P) {
+        List<Double> A = IntStream.range(0,sequenceLength-motifLength)
                 .parallel()
-                .mapToObj(x -> calculateMotifProbability(q_ij, z, x))
+                .mapToObj(x -> calculateMotifProbability(q_ij, z, x, P))
                 .collect(Collectors.toList());
-        List<Double> weightDistribution = smoothProbabilities(Q);
+        List<Double> weightDistribution = smoothProbabilities(A);
         Double choice = weightedChooseIndex(weightDistribution);
         int a_x = IntStream.range(0,sequenceLength-motifLength)
-                .reduce(0, (a,b) -> Q.get(a).equals(choice) ? a : b);
+                .reduce(0, (a,b) -> A.get(a).equals(choice) ? a : b);
         return a_x;
+    }
+
+    /**
+     * calculates the log probability of a character appearing at a specific index in a motif
+     * @param q_ij, motif weight matrix
+     * @param z, string of characters
+     * @param x, index of site in z
+     * @param P, background frequencies
+     * @return log probability
+     */
+    private Double calculateMotifProbability(SequenceMatrix q_ij, String z, int x, List<Double> P) {
+        return IntStream.range(0,motifLength)
+                .mapToObj(i -> {
+                    int baseIdx = Utils.indexOfBase(z.charAt(x + i));
+                    double q = q_ij.probability(i, baseIdx);
+                    double p = 1 / P.get(baseIdx);
+                    return Math.log(q/p);
+                })
+                .reduce(0.0, Double::sum);
+    }
+
+    /**
+     * Takes Q a list of log probabilities
+     * Replaces negative infinities with 1 less than the minimum log probability
+     * @param A, log probabilities
+     * @return list of smoothed probabilities
+     */
+    private List<Double> smoothProbabilities(List<Double> A) {
+        // Find the smallest probability greater than 0
+        BinaryOperator<Double> minExceptInfinity = (a, b) -> a < b && !b.equals(Double.NEGATIVE_INFINITY) ? b : a;
+        Double min = A.stream().reduce(Double.NEGATIVE_INFINITY, minExceptInfinity);
+
+        // Assert that there is some non zero probability so that we may smooth
+        if(min <= Double.NEGATIVE_INFINITY + 1)
+            return A.stream().map(a -> -100.0).collect(Collectors.toList());
+        else
+        // Replace the 0 probability indices with (min - 1) log probability
+            return A.stream()
+                .map(a -> a.equals(Double.NEGATIVE_INFINITY) ? min - 1: a)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -189,42 +248,7 @@ public class GibbsSampler extends MotifFinder {
      */
     private Double weightedChooseIndex(List<Double> weightDistribution) {
         return weightDistribution.stream()
-                    .reduce(Double.NEGATIVE_INFINITY, (a, b) -> a > b ? a : b);
-    }
-
-    /**
-     * Takes Q a list of log probabilities
-     * Replaces negative infinities with 1 less than the minimum log probability
-     * @param Q, log probabilities
-     * @return list of smoothed probabilities
-     */
-    private List<Double> smoothProbabilities(List<Double> Q) {
-        // Find the smallest probability greater than 0
-        BinaryOperator<Double> minExceptInfinity = (a, b) -> a < b && !b.equals(Double.NEGATIVE_INFINITY) ? b : a;
-        Double min = Q.stream().reduce(Double.NEGATIVE_INFINITY, minExceptInfinity);
-
-        // Assert that there is some non zero probability so that we may smooth
-        if(min <= Double.NEGATIVE_INFINITY + 1)
-            return Q.stream().map(a -> -100.0).collect(Collectors.toList());
-        else
-        // Replace the 0 probability indices with (min - 1) log probability
-            return Q.stream()
-                .map(a -> a.equals(Double.NEGATIVE_INFINITY) ? min - 1: a)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * calculates the log probability of a character appearing at a specific index in a motif
-     * @param q_ij, motif weight matrix
-     * @param z, string of characters
-     * @param x, index of site in z
-     * @return log probability
-     */
-    private Double calculateMotifProbability(SequenceMatrix q_ij, String z, int x) {
-        return IntStream.range(0,motifLength)
-                .mapToObj(i -> q_ij.probability(i, Utils.indexOfBase(z.charAt(x + i))))
-                .map(p -> Math.log(p))
-                .reduce(0.0, (a, b) -> a + b);
+                .reduce(Double.NEGATIVE_INFINITY, (a, b) -> a > b ? a : b);
     }
 
     /**

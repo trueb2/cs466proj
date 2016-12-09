@@ -14,7 +14,7 @@ public class SequenceMatrix extends WeightMatrix {
     public SequenceMatrix(List<String> sequences) {
         this.sequences = sequences;
         this.sequenceCount = sequences.size();
-        countSum = sequenceCount;
+        rowSum = sequenceCount;
         this.sequenceLength = sequences.get(0).length();
         initMatrix(sequenceLength, 4);
         initSequenceMatrix();
@@ -27,7 +27,7 @@ public class SequenceMatrix extends WeightMatrix {
         initMatrix(rows, 4);
         IntStream.range(0,rows).parallel().forEach(i -> {
             IntStream.range(0,4).forEach(j -> {
-                countMatrix[i][j] = 1;
+                countsMatrix[i][j] = 1;
             });
         });
     }
@@ -40,7 +40,7 @@ public class SequenceMatrix extends WeightMatrix {
             String sequence = sequences.get(i);
             IntStream.range(0,sequenceLength).forEach(j -> {
                 int b = Utils.indexOfBase(sequence.charAt(j));
-                countMatrix[j][b]++;
+                countsMatrix[j][b]++;
             });
         });
     }
@@ -51,6 +51,6 @@ public class SequenceMatrix extends WeightMatrix {
      * @param base, base in the index
      */
     public double probability(int index, int base) {
-        return ((double) countMatrix[index][base]) / ((double) countSum);
+        return ((double) countsMatrix[index][base]) / ((double) rowSum);
     }
 }

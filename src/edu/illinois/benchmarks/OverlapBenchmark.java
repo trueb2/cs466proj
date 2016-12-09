@@ -9,13 +9,10 @@ import java.util.Scanner;
  */
 public class OverlapBenchmark extends Benchmark {
 
-    String odr;
-    int motifLength;
-
     public OverlapBenchmark(String outputDirectory, int motifLength) throws FileNotFoundException {
-        super(outputDirectory);
-        odr = outputDirectory;
+        super(outputDirectory, "OverlapBenchmark");
         this.motifLength = motifLength;
+
     }
 
     @Override
@@ -24,8 +21,8 @@ public class OverlapBenchmark extends Benchmark {
         int numOverlappingPositions = 0;
 
         try {
-            Scanner sitesScan = new Scanner(new FileReader(odr + "sites.txt"));
-            Scanner predScan = new Scanner(new FileReader(odr + "predictedsites.txt"));
+            Scanner sitesScan = new Scanner(new FileReader(outputDirectory + "sites.txt"));
+            Scanner predScan = new Scanner(new FileReader(outputDirectory + "predictedsites.txt"));
 
             while (sitesScan.hasNextLine() && predScan.hasNextLine()) {
                 String sitesLine = sitesScan.nextLine();

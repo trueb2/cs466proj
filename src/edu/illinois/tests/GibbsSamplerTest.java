@@ -50,7 +50,7 @@ public class GibbsSamplerTest {
         GibbsSampler gs = new GibbsSampler("sequences.fa","motiflength.txt", OUTPUT_DIRECTORY);
         gs.find(100, 500, new Random(1));
         try {
-            Benchmark b = new Benchmark(OUTPUT_DIRECTORY) {
+            Benchmark b = new Benchmark(OUTPUT_DIRECTORY, "PrintBenchmark") {
                 public void benchmark() {
                     String s = getSites().stream()
                             .map(i -> i.toString())

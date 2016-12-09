@@ -3,6 +3,7 @@ package edu.illinois.Matrix;
 import edu.illinois.Utils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static java.util.stream.IntStream.range;
@@ -13,7 +14,7 @@ public class MotifMatrix extends WeightMatrix {
     private double informationContentPerColumn;
 
     /**
-     * Creates a countMatrix that may be sampled from where 
+     * Creates a countsMatrix that may be sampled from where
      * columns have informationContentPerColumn information content
      * and there are motifLength columns
      * @param informationContentPerColumn, information content per column
@@ -26,8 +27,12 @@ public class MotifMatrix extends WeightMatrix {
         initMotifMatrix();
     }
 
+    public MotifMatrix(List<List<Integer>> countsLists) {
+        super();
+    }
+
     /**
-     * Initializes the countMatrix then randomly
+     * Initializes the countsMatrix then randomly
      * chooses the probabilities based off of the
      * information content per column
      */
@@ -38,7 +43,7 @@ public class MotifMatrix extends WeightMatrix {
     }
 
     /**
-     * Call this upon each row of the countMatrix
+     * Call this upon each row of the countsMatrix
      * 1. Picks a random base to emphasize
      * 2. Maintains an epoch and step counter to add less as epochs go on
      * 3. Randomly picks a base other than the target base and takes step
@@ -51,11 +56,11 @@ public class MotifMatrix extends WeightMatrix {
      * @param idx, row index of motif to perform work on
      */
     private void stochasticGradientDescent(Random r, int idx) {
-        int prevStep = countSum / 4 / 1000;
+        int prevStep = rowSum / 4 / 1000;
         int step = prevStep > 0 ? prevStep : 5;
-        int[] row = countMatrix[idx];
+        int[] row = countsMatrix[idx];
         int incIdx = r.nextInt(4);
-        double ic = Utils.calcInformationContent(countSum, row);
+        double ic = Utils.calcInformationContent(rowSum, row);
         assert(ic == 0);
 
         int decIdx = incIdx;
@@ -69,7 +74,7 @@ public class MotifMatrix extends WeightMatrix {
                 } else {
                     row[incIdx] += step;
                     row[decIdx] -= step;
-                    ic = Utils.calcInformationContent(countSum, row);
+                    ic = Utils.calcInformationContent(rowSum, row);
                 }
             }
             prevStep = step;
@@ -78,9 +83,9 @@ public class MotifMatrix extends WeightMatrix {
                 row[incIdx] -= step;
                 row[decIdx] += step;
             }
-            ic = Utils.calcInformationContent(countSum, row);
+            ic = Utils.calcInformationContent(rowSum, row);
         }
-        countMatrix[idx] = row;
+        countsMatrix[idx] = row;
     }
 
     /**
@@ -106,13 +111,13 @@ public class MotifMatrix extends WeightMatrix {
     }
 
     /**
-     * Initializes the countMatrix with the countSum/4 value
+     * Initializes the countsMatrix with the rowSum/4 value
      */
     public void initCountMatrix() {
-        countMatrix = new int[motifLength][4];
-        int initCount = countSum / 4;
+        countsMatrix = new int[motifLength][4];
+        int initCount = rowSum / 4;
         range(0,motifLength).parallel().forEach(i ->
-                range(0, 4).forEach(j -> countMatrix[i][j] = initCount));
+                range(0, 4).forEach(j -> countsMatrix[i][j] = initCount));
     }
 
     /**
@@ -122,10 +127,10 @@ public class MotifMatrix extends WeightMatrix {
     public String sample(Random r) {
         StringBuilder stringBuilder = new StringBuilder();
         range(0,motifLength).forEach(i -> {
-            int randomWeight = r.nextInt(countSum);
+            int randomWeight = r.nextInt(rowSum);
             int j = -1, k = 0;
             do {
-                k += countMatrix[i][++j];
+                k += countsMatrix[i][++j];
             } while(k < randomWeight);
             stringBuilder.append(Utils.ACGT[j]);
         });
