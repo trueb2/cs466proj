@@ -208,6 +208,7 @@ public class GibbsSampler extends MotifFinder {
     public List<Integer> gibbsSample(Random r, int maxIterations) {
         List<Integer> sites = getRandomSites(r);
         SequenceMatrix Q = new SequenceMatrix(sequences);
+        SequenceMatrix P = new SequenceMatrix(sequenceLength);
         int i = 0;
         while (i < maxIterations) {
             String z = predictiveUpdateStep(r, i);

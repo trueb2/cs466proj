@@ -19,6 +19,18 @@ public class SequenceMatrix extends WeightMatrix {
         initSequenceMatrix();
     }
 
+    public SequenceMatrix(int rows) {
+        sequences = null;
+        sequenceCount = 4;
+        sequenceLength = rows;
+        initMatrix(rows, 4);
+        IntStream.range(0,rows).parallel().forEach(i -> {
+            IntStream.range(0,4).forEach(j -> {
+                countMatrix[i][j] = 1;
+            });
+        });
+    }
+
     /**
      * Counts the occurrences of each base along each position of each sequence
      */
