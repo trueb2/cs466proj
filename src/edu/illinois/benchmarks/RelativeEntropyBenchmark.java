@@ -1,8 +1,13 @@
 package edu.illinois.benchmarks;
 
+import edu.illinois.Writer;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class RelativeEntropyBenchmark extends Benchmark {
     
@@ -62,26 +67,20 @@ public class RelativeEntropyBenchmark extends Benchmark {
             e.printStackTrace();
         }
 
-        System.out.println("Positional relative entropy values = ");
-        printDoubles(posRelEntropy);
-        System.out.println();
-        System.out.println("Total relative entropy D(acc|predicted) = ");
-        sumDoubles(posRelEntropy);
-        System.out.println();
+        String entropiesString = Arrays.stream(posRelEntropy)
+                .mapToObj(Double::toString)
+                .collect(Collectors.joining( " "));
+        String totalEntropyString = ((Double) Arrays.stream(posRelEntropy).sum()).toString();
+        System.out.println(String.format("Positional relative entropy values = %s", entropiesString));
+        System.out.println(String.format("Total relative entropy D(acc|predicted) = %s", totalEntropyString));
 
-    }
-
-    private void printDoubles(double[] list) {
-        for (double tmp : list) {
-            System.out.print(tmp + " ");
+        try {
+            Writer.writeResult(outputDirectory, BENCHMARK, entropiesString + "\n" + totalEntropyString);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-    }
 
-    private void sumDoubles(double[] list) {
-        double total = 0;
-        for (double tmp : list) {
-            total += tmp;
-        }
-        System.out.println(total);
     }
 }

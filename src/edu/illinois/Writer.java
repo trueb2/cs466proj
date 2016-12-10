@@ -96,6 +96,19 @@ public class Writer {
     }
 
     /**
+     * Writes a benchmark result to the output directory
+     * @param outputDirectory, the directory to print the files in
+     * @param benchmark, name of benchmark
+     * @param result, result for file
+     */
+    public static void writeResult(String outputDirectory, String benchmark, String result) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter printWriter = new PrintWriter(outputDirectory + "/" + benchmark.toLowerCase(), "UTF-8");
+        printWriter.write(result);
+        printWriter.close();
+    }
+
+
+    /**
      * Creates the directory where the files will be written
      * @param filename, path to a file that needs to be written
      */

@@ -11,7 +11,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public abstract class Benchmark {
-    private String BENCHMARK;
+    String BENCHMARK;
     private List<String> motifs;
     private List<String> predictedMotifs;
     List<Integer> sites;

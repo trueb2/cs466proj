@@ -69,11 +69,8 @@ public class GibbsSamplerTest {
                 "Number of matched bases: 80\n" +
                 "\n" +
                 "Performing :: RelativeEntropyBenchmark\n" +
-                "Positional relative entropy values = \n" +
-                "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \n" +
-                "Total relative entropy D(acc|predicted) = \n" +
-                "0.0\n" +
-                "\n";
+                "Positional relative entropy values = 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n" +
+                "Total relative entropy D(acc|predicted) = 0.0\n";
         String actual = out.toString().replaceAll("\\r", "");
         actual = actual.substring(actual.length() - expected.length());
         assertEquals(actual.length(), expected.length());

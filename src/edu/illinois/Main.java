@@ -27,10 +27,10 @@ public class Main {
             run(args);
         } else if(args.length == 1) {
             //other default values
-            double[] icpcDefaults = {1, 1.5, 2};
-            int[] mlDefaults = {6, 7, 8};
+            double[] icpcDefaults = {0.0, 1.0, 1.5, 2};
+            int[] mlDefaults = {6, 7, 8, 16};
             int[] slDefaults = {500};
-            int[] scDefaults = {5, 10, 20};
+            int[] scDefaults = {5, 10, 20, 50};
 
             for(Double icpc : icpcDefaults) {
                 for(Integer ml : mlDefaults) {

@@ -1,7 +1,10 @@
 package edu.illinois.benchmarks;
 
+import edu.illinois.Writer;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Scanner;
 
 public class OverlapBenchmark extends Benchmark {
@@ -63,6 +66,14 @@ public class OverlapBenchmark extends Benchmark {
         System.out.println("Number of overlapping motifs: " + numMotifOverlaps);
         System.out.println("Number of matched bases: " + numOverlappingPositions);
         System.out.println();
+
+        try {
+            Writer.writeResult(outputDirectory, BENCHMARK, numMotifOverlaps + "\n" + numOverlappingPositions);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean doesOverlap(int sitePos, int predPos) {

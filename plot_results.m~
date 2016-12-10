@@ -1,0 +1,6 @@
+%% Read the benchmark outputs in out/data/*
+folders = dir('out/data');
+
+for folder = files'
+    
+end
