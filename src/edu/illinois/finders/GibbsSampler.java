@@ -17,10 +17,19 @@ import java.util.stream.IntStream;
 
 public class GibbsSampler extends MotifFinder {
 
+    private static final double LOG_2 = Math.log(2);
+
     public GibbsSampler(String fastaFilePath, String motifLengthPath, String outputDirectory) {
         super(fastaFilePath, motifLengthPath, outputDirectory);
     }
 
+    /**
+     * Runs numSamples gibbsSamples to find a prediction on the sites
+     * and motifs with the highest information content in the sequences
+     * @param maxIterations, maximum number of times to iterate in a Gibbs Sample
+     * @param numSamples, number of times to Gibbs Sample
+     * @param r, object to provide randomness
+     */
     public void find(int maxIterations, int numSamples, Random r) {
         System.out.println("============= Input Sequences =============");
         sequences.forEach(System.out::println);
@@ -71,7 +80,7 @@ public class GibbsSampler extends MotifFinder {
         SequenceMatrix sm = new SequenceMatrix(motifs);
         return IntStream.range(0,motifLength)
                 .mapToDouble(i ->  IntStream.range(0, 4)
-                            .mapToDouble(j -> sm.probability(i, j) * (Math.log(sm.probability(i, j)*4) / Math.log(2)))
+                            .mapToDouble(j -> sm.probability(i, j) * (Math.log(sm.probability(i, j)*4) / LOG_2))
                             .filter(d -> !Double.isNaN(d))
                             .sum())
                 .sum();
