@@ -10,11 +10,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 public class Main {
-
+/**
+ * Runtime Seq Gen = O( sc(sl+ml)+ml+sc )
+ * Runtime GS = O( [sc * sl + sc * ml] + [ ns * mI * sc * (ml + sc) ] )  worst case : runs in sequential although we did it in parallel
+ * Runtime B = O ( sc * sl + sc * ml )
+**/
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         if(args.length == 0) {
             //default
-            Double icpc = 2.0;
+            Double icpc = 1.0;
             Integer ml = 8;
             Integer sc = 10;
             Integer sl = 500;
