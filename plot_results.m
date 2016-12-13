@@ -67,18 +67,22 @@ function readFiles(outDir, folder)
     global predicted
     global actIcResults
     
-    [actualIc, ~] = strread(folder.name, 'seq_%f%s');
-    fprintf('%1.1f :: %s\n', actualIc, folder.name);
-    actIcResults = [actIcResults; actualIc];
-    
     filePath = [outDir '/' folder.name];
-     for file = dir(filePath)'
-         if strcmp(file.name, overlap)
-             readOverlap([filePath '/' overlap]);
-         elseif strcmp(file.name, entropy)           
-             readEntropy([filePath '/' entropy]);
-         elseif strcmp(file.name, predicted)
-             readPredicted([filePath '/' predicted]);
-         end
-     end 
+    files = dir(filePath);
+    if(length(files) ~= 10)
+        disp(folder.name)
+    else
+        [actualIc, ~] = strread(folder.name, 'seq_%f%s');
+        actIcResults = [actIcResults; actualIc];
+    end
+
+    for file = dir(filePath)'
+        if strcmp(file.name, overlap)
+            readOverlap([filePath '/' overlap]);
+        elseif strcmp(file.name, entropy)           
+            readEntropy([filePath '/' entropy]);
+        elseif strcmp(file.name, predicted)
+            readPredicted([filePath '/' predicted]);
+        end
+    end 
 end
