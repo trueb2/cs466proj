@@ -56,9 +56,13 @@ function readPredicted(fileName)
     fid = fopen(fileName);
     predMotif = textscan(fid, '%s');
     firstLine = predMotif{1}{1};
-    predIc = strread(firstLine, '%s', 'delimiter', '_');
-    predIcResults = [predIcResults; str2double(predIc{6})];
+    predIc = strread(firstLine, '%s', 'delimiter', '_'){6};
+    predIcResults = [predIcResults; str2 1.0];
     fclose(fid);
+end
+
+function ic = getIcFromFolderName(folderName)
+    [ic, ~] = strread(folderName, 'seq_%f%s');
 end
 
 function readFiles(outDir, folder)
@@ -67,7 +71,7 @@ function readFiles(outDir, folder)
     global predicted
     global actIcResults
     
-    [actualIc, ~] = strread(folder.name, 'seq_%f%s');
+    actualIc = getIcFromFolderName(folder.name);
     fprintf('%1.1f :: %s\n', actualIc, folder.name);
     actIcResults = [actIcResults; actualIc];
     
