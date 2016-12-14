@@ -27,7 +27,19 @@ public class Main {
             args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
             run(args);
         } else if(args.length == 1) {
-            //other default values
+            //all default values
+            double[] icpcDefaults = {1.0, 1.5, 2};
+            int[] mlDefaults = {6, 7, 8};
+            int[] scDefaults = {5, 10, 20};
+
+            for(Double icpc : icpcDefaults)
+                run(new String[]{icpc.toString(),"8","500","10"});
+            for(Integer ml : mlDefaults)
+                run(new String[]{"2.0",ml.toString(),"500","10"});
+            for(Integer sc : scDefaults)
+                run(new String[]{"2.0","8","500",sc.toString()});
+        } else if (args.length == 2) {
+            //all values that we want to test
             double[] icpcDefaults = {0.0, 1.0, 1.5, 2};
             int[] mlDefaults = {6, 7, 8, 16};
             int[] slDefaults = {500};

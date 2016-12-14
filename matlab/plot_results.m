@@ -12,7 +12,7 @@ function plot_results
 
     %% Read the benchmark outputs in out/data/*
     % Get a list of all the output folders
-    outDir = '../out/data';
+    outDir = '../out/all_data';
     folders = dir(outDir);
     folders = folders(cellfun('length', {folders.name})>3);
     
@@ -35,5 +35,5 @@ function plot_results
     ylabel(axes(1), 'Predicted Overlaps');
     ylabel(axes(2), 'Total Relative Entropy');
     ylabel(axes(3), 'Predicted ICPC');
-    title('Parameters versus Benchmark Results of Gibbs Sampling Motif Finder')
+    title('Results of Gibbs Sampling Motif Finder over All Parameters')
 end
