@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
-public class Main {
+class Main {
 /**
  * Runtime Seq Gen = O( sc(sl+ml)+ml+sc )
  * Runtime GS = O( [ sc(sl+ml) ] + [ ns * mI * sc(ml+sl) ] )
@@ -24,7 +24,7 @@ public class Main {
             Integer sc = 10;
             Integer sl = 500;
 
-            args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
+            args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString(), ""};
             run(args);
         } else if(args.length == 1) {
             //all default values
@@ -32,12 +32,15 @@ public class Main {
             int[] mlDefaults = {6, 7, 8};
             int[] scDefaults = {5, 10, 20};
 
-            for(Double icpc : icpcDefaults)
-                run(new String[]{icpc.toString(),"8","500","10"});
-            for(Integer ml : mlDefaults)
-                run(new String[]{"2.0",ml.toString(),"500","10"});
-            for(Integer sc : scDefaults)
-                run(new String[]{"2.0","8","500",sc.toString()});
+            for(int i = 0; i < 10; i++) {
+                String prefix = String.valueOf(i);
+                for (Double icpc : icpcDefaults)
+                    run(new String[]{icpc.toString(), "8", "500", "10", prefix});
+                for (Integer ml : mlDefaults)
+                    run(new String[]{"2.0", ml.toString(), "500", "10", prefix});
+                for (Integer sc : scDefaults)
+                    run(new String[]{"2.0", "8", "500", sc.toString(), prefix});
+            }
         } else if (args.length == 2) {
             //all values that we want to test
             double[] icpcDefaults = {0.0, 1.0, 1.5, 2};
@@ -45,18 +48,20 @@ public class Main {
             int[] slDefaults = {500};
             int[] scDefaults = {5, 10, 20, 50};
 
-            for(Double icpc : icpcDefaults) {
-                for(Integer ml : mlDefaults) {
-                    for(Integer sl : slDefaults) {
-                        for(Integer sc : scDefaults) {
-                            args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString()};
-                            run(args);
+            for(int i = 0; i < 10; i++) {
+                for (Double icpc : icpcDefaults) {
+                    for (Integer ml : mlDefaults) {
+                        for (Integer sl : slDefaults) {
+                            for (Integer sc : scDefaults) {
+                                args = new String[]{icpc.toString(), ml.toString(), sl.toString(), sc.toString(), String.valueOf(i)};
+                                run(args);
+                            }
                         }
                     }
                 }
             }
-        } else {
-            run(args);
+        } else if (args.length == 4) {
+            run(new String[]{args[0], args[1], args[2], args[3], ""});
         }
     }
 
@@ -69,9 +74,11 @@ public class Main {
         int sl = Integer.parseInt(args[2]);
         //sequence count
         int sc = Integer.parseInt(args[3]);
+        //outputDirectory prefix
+        String prefix = args[4];
 
         //output file locations
-        String outDir = String.format("out/data/seq_%.1f_%d_%d_%d/", icpc, ml, sl, sc);
+        String outDir = String.format("out/data/%sseq_%.1f_%d_%d_%d/", prefix, icpc, ml, sl, sc);
         String fastaFileName = "sequences.fa";
         String sitesFileName = "sites.txt";
         String motifFileName = "motif.txt";

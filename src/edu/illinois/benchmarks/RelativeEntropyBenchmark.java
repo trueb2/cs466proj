@@ -76,9 +76,7 @@ public class RelativeEntropyBenchmark extends Benchmark {
 
         try {
             Writer.writeResult(outputDirectory, BENCHMARK, entropiesString + "\n" + totalEntropyString);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 

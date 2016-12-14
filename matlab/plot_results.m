@@ -12,12 +12,12 @@ function plot_results
 
     %% Read the benchmark outputs in out/data/*
     % Get a list of all the output folders
-    outDir = '../out/all_data';
+    outDir = '../out/data';
     folders = dir(outDir);
     folders = folders(cellfun('length', {folders.name})>3);
     
     % Read the benchmarks in each folder
-    arrayfun(@(f) read_files(outDir,f), folders)
+    arrayfun(@(f) read_files(outDir,f), folders);
     
     %% Do some cool graphing and stats
     icpc = [runs.icpc]';
@@ -28,14 +28,14 @@ function plot_results
     p = [runs.pred_icpc]';
     X = [icpc, ml, sc];
     Y = [o, e, p];
-    [~, axes] = plotmatrix(X,Y);
+    [~, axes] = plotmatrix(X,Y, 'o');
     xlabel(axes(3), 'Actual ICPC');
     xlabel(axes(6), 'Actual ML');
     xlabel(axes(9), 'Actual SC');
     ylabel(axes(1), 'Predicted Overlaps');
     ylabel(axes(2), 'Total Relative Entropy');
     ylabel(axes(3), 'Predicted ICPC');
-    title('Results of Gibbs Sampling Motif Finder over All Parameters')
+    title('Results of Gibbs Sampling Motif Finder over All Default Parameters')
     
     fid = fopen('stats_output','w');
     print_stats(fid, 'icpc', icpc);

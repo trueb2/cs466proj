@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.IntStream.range;
@@ -46,7 +45,7 @@ public class Writer {
      * @param filename
      * @return success of writing to file
      */
-    public static void writeFasta(int sc, List<String> sequences, String filename) throws FileNotFoundException, UnsupportedEncodingException {
+    private static void writeFasta(int sc, List<String> sequences, String filename) throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
         range(0,sc).forEach(i -> {
             String sequence = sequences.get(i);
@@ -89,7 +88,7 @@ public class Writer {
      * @param ml
      * @param filename
      */
-    public static void writeMotifLength(int ml, String filename) throws FileNotFoundException, UnsupportedEncodingException {
+    private static void writeMotifLength(int ml, String filename) throws FileNotFoundException, UnsupportedEncodingException {
         PrintWriter printWriter = new PrintWriter(filename, "UTF-8");
         printWriter.println(ml);
         printWriter.close();
@@ -112,7 +111,7 @@ public class Writer {
      * Creates the directory where the files will be written
      * @param filename, path to a file that needs to be written
      */
-    static void initOutputDirectory(String filename) {
+    private static void initOutputDirectory(String filename) {
         File file = new File(filename);
         File parentDir = file.getParentFile();
         if(parentDir != null)

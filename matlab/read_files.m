@@ -11,7 +11,7 @@ function read_files(outDir, folder)
         return
     end
     
-    [icpc, ml, sl, sc] = strread(folder.name, 'seq_%f_%d_%d_%d');
+    [~, icpc, ml, sl, sc] = strread(folder.name, '%dseq_%f_%d_%d_%d');
     
     for file = dir(filePath)'
         if strcmp(file.name, overlap)

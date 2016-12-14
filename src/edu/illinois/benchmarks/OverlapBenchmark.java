@@ -69,9 +69,7 @@ public class OverlapBenchmark extends Benchmark {
 
         try {
             Writer.writeResult(outputDirectory, BENCHMARK, numMotifOverlaps + "\n" + numOverlappingPositions);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }

@@ -38,10 +38,16 @@ public class GibbsSampler extends MotifFinder {
         List<String> predictedMotifs = new ArrayList<>();
         final double[] maxInformationContent = {Double.NEGATIVE_INFINITY};
         IntStream.range(0,numSamples).parallel().forEach(j -> {
+            synchronized (maxInformationContent) {
+                if (maxInformationContent[0] / motifLength == 2.0)
+                    return;
+            }
+
             List<Integer> sites = gibbsSample(r, maxIterations, new ArrayList<>(sequences));
             String s = sites.stream()
                     .map(Object::toString)
                     .collect(Collectors.joining(" "));
+
             List<String> motifs = getMotifStrings(sequences, sites);
             double informationContent = informationContent(motifs);
             boolean newMax;

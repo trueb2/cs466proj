@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-public abstract class Benchmark {
+abstract class Benchmark {
     String BENCHMARK;
     private List<String> motifs;
     private List<String> predictedMotifs;
