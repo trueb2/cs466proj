@@ -2,52 +2,50 @@ function read_files(outDir, folder)
     global overlap
     global entropy
     global predicted
-    global actIcResults
+    global runs
     
     filePath = [outDir '/' folder.name];
     files = dir(filePath);
     if(length(files) ~= 10)
         disp(folder.name)
-    else
-        [actualIc, ~] = strread(folder.name, 'seq_%f%s');
-        actIcResults = [actIcResults; actualIc];
+        return
     end
-
+    
+    [icpc, ml, sl, sc] = strread(folder.name, 'seq_%f_%d_%d_%d');
+    
     for file = dir(filePath)'
         if strcmp(file.name, overlap)
-            readOverlap([filePath '/' overlap]);
+            o = readOverlap([filePath '/' overlap]);
         elseif strcmp(file.name, entropy)           
-            readEntropy([filePath '/' entropy]);
+            e = readEntropy([filePath '/' entropy]);
         elseif strcmp(file.name, predicted)
-            readPredicted([filePath '/' predicted]);
+            p = readPredicted([filePath '/' predicted]);
         end
-    end 
+    end
+    runs(end+1) = struct('icpc', { icpc }, 'ml', { ml }, 'sl', { sl }, ...
+        'sc', { sc }, 'overlap', { o }, 'entropy', { e }, 'pred_icpc', { p });
 end
 
-function readOverlap(fileName)
-    global overlapResults
+function o = readOverlap(fileName)
     fid = fopen(fileName);
     overlaps = textscan(fid, '%d\n%d');
-    overlapResults = [overlapResults; overlaps{1}];
     fclose(fid);
+    o = overlaps{1};
 end
 
-function readEntropy(fileName)
-    global entropyResults
+function e = readEntropy(fileName)
     fid = fopen(fileName);
     entropies = textscan(fid, '%s');
-    entropies = entropies{1};
-    totalEntropy = str2double(entropies{length(entropies)});
-    entropyResults = [entropyResults; totalEntropy];
     fclose(fid);
+    entropies = entropies{1};
+    e = str2double(entropies{length(entropies)});
 end
 
-function readPredicted(fileName)
-    global predIcResults
+function p = readPredicted(fileName)
     fid = fopen(fileName);
     predMotif = textscan(fid, '%s');
+    fclose(fid);
     firstLine = predMotif{1}{1};
     predIc = strread(firstLine, '%s', 'delimiter', '_');
-    predIcResults = [predIcResults; str2double(predIc{6})];
-    fclose(fid);
+    p = str2double(predIc{6});
 end
