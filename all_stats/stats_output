@@ -1,0 +1,42 @@
+Stats for icpc
+min :: 0.000000
+max :: 2.000000
+mean :: 1.125000
+mode :: 0.000000
+standard deviation :: 0.740668
+
+Stats for ml
+min :: 6.000000
+max :: 16.000000
+mean :: 9.250000
+mode :: 6.000000
+standard deviation :: 3.966948
+
+Stats for sc
+min :: 5.000000
+max :: 50.000000
+mean :: 21.250000
+mode :: 5.000000
+standard deviation :: 17.482638
+
+Stats for overlaps
+min :: 0.000000
+max :: 50.000000
+mean :: 11.059375
+mode :: 0.000000
+standard deviation :: 14.865106
+
+Stats for entropy
+min :: -4.229823
+max :: 20.123541
+mean :: -0.087336
+mode :: 0.000000
+standard deviation :: 2.388475
+
+Stats for predicted icpc
+min :: 0.623546
+max :: 2.000000
+mean :: 1.549054
+mode :: 2.000000
+standard deviation :: 0.384439
+

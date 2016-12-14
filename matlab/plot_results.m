@@ -12,7 +12,7 @@ function plot_results
 
     %% Read the benchmark outputs in out/data/*
     % Get a list of all the output folders
-    outDir = '../out/data';
+    outDir = '../all_default_data';
     folders = dir(outDir);
     folders = folders(cellfun('length', {folders.name})>3);
     
@@ -27,7 +27,7 @@ function plot_results
     e = [runs.entropy]';
     p = [runs.pred_icpc]';
     X = [icpc, ml, sc];
-    Y = [o, e, p];
+    Y = [double(o), double(e), double(p)];
     [~, axes] = plotmatrix(X,Y, 'o');
     xlabel(axes(3), 'Actual ICPC');
     xlabel(axes(6), 'Actual ML');
