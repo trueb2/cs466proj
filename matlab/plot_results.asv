@@ -20,23 +20,21 @@ function plot_results
     arrayfun(@(f) read_files(outDir,f), folders);
     
     %% Do some cool graphing and stats
-    icpc = double([runs.icpc]');
-    ml = double([runs.ml]');
-    sc = double([runs.sc]');
-    o = double([runs.overlap]');
-    op = o ./ sc;
-    e = double([runs.entropy]');
-    p = double([runs.pred_icpc]');
+    icpc = toCol('icpc');
+    ml = toCol('ml');
+    sc = toCol('sc');
+    o = toCol('overlap');
+    e = toCol('entropy');
+    p = toCol('pred_icpc');
     X = [icpc, ml, sc];
-    Y = [o, op, e, p];
+    Y = [double(o), double(e), double(p), double(o)/double(ml)];
     [~, axes] = plotmatrix(X,Y, 'o');
-    xlabel(axes(4), 'Actual ICPC');
-    xlabel(axes(8), 'Actual ML');
-    xlabel(axes(12), 'Actual SC');
+    xlabel(axes(3), 'Actual ICPC');
+    xlabel(axes(6), 'Actual ML');
+    xlabel(axes(9), 'Actual SC');
     ylabel(axes(1), 'Predicted Overlaps');
-    ylabel(axes(2), 'Percent Sites Predicted');
-    ylabel(axes(3), 'Total Relative Entropy');
-    ylabel(axes(4), 'Predicted ICPC');
+    ylabel(axes(2), 'Total Relative Entropy');
+    ylabel(axes(3), 'Predicted ICPC');
     title('Results of Gibbs Sampling Motif Finder over All Default Parameters')
     
     fid = fopen('stats_output','w');
@@ -44,10 +42,14 @@ function plot_results
     print_stats(fid, 'ml', ml);
     print_stats(fid, 'sc', sc);
     print_stats(fid, 'overlaps', o);
-    print_stats(fid, 'percent sites predicted', op);
     print_stats(fid, 'entropy', e);
     print_stats(fid, 'predicted icpc', p);
     fclose(fid);
+end
+
+function c = toCol(asdf)
+    global runs
+    c = double([runs(asdf)]');
 end
 
 function print_stats(fid, name, asdf)

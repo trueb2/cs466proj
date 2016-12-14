@@ -26,6 +26,13 @@ mean :: 8.642857
 mode :: 10.000000
 standard deviation :: 5.781118
 
+Stats for percent sites predicted
+min :: 0.000000
+max :: 1.000000
+mean :: 0.792857
+mode :: 1.000000
+standard deviation :: 0.358063
+
 Stats for entropy
 min :: -1.525022
 max :: 1.342878
