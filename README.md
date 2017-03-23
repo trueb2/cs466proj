@@ -3,12 +3,12 @@
 Due sometime around finals week, exact due date to be announced later.
 To be performed in teams of three.
 
-####Submission:
+#### Submission:
 + A PDF document briefly describing your algorithm,
 + Excel spreadsheets/pdfs showing performance evaluation, and
 + PDF document briefly describing any observations from the evaluation phase.
 
-###Demos: 
+### Demos: 
 ~20 min demos will be scheduled (also around finals week), where each team will explain their report to the instructor and/or TA.
 Please consult with the instructor if you have any doubts.
 
@@ -19,10 +19,10 @@ The project involves developing a “motif finding” program and testing it. Th
 
 Word of advice: Do not wait until the last week to do everything. In the past, some teams have tried this, confident in their programming abilities, but in many cases they failed to do the last step (of performance evaluation) satisfactorily, because this step took more running time than they had budgeted for!
 
-##Step 1: Building a benchmark for motif finding
+## Step 1: Building a benchmark for motif finding
 A benchmark is a collection of synthetic data sets. A synthetic data set is a set of DNA sequences, into which a “motif” (position weight matrix) has been “planted”. To construct a synthetic data set, you will do the following:
 
-####Take as input:
+#### Take as input:
 
 - A positive number called ICPC (“information content per column”) (b) A positive integer called ML (“motif length”)
 - A positive integer called SL (“sequence length”)
@@ -55,18 +55,19 @@ For each parameter combination prescribed in a-c above, generate 10 data sets. N
 So, there are (1+2+2+2) x 10 = 70 data sets in the benchmark. Write a program that will generate a benchmark.
 
 
-##Step 2: Implementing the motif-finder
+## Step 2: Implementing the motif-finder
 Write a program that will read the “sequences.fa” file and “motiflength.txt” file in a data set and find a motif (position weight matrix) of length given by the “motiflength.txt” file. How you find the motif (i.e., the algorithm) is entirely up to you. Needless to say, your program should not “look at” motif.txt or sites.txt.
 The program should produce two output files for the data set:
 
 1. “predictedmotif.txt”, in the same format as “motif.txt” from the data set.
 2. “predictedsites.txt”, in the same format as “sites.txt” from the data set. This file will have your program’s prediction of one site per sequence.
  
-##Step 3: Evaluating the motif finder on the benchmark
+## Step 3: Evaluating the motif finder on the benchmark
 You will write a program/script that will run and evaluate the motif finder on each data set. You are welcome to think of ways to evaluate motif finding performance on a data set, but some obvious criteria are:
 
 1. Relative Entropy between “motif.txt” and “predictedmotif.txt” (search the web for what “relative entropy” means).
 2. Number of overlapping positions or overlapping sites between “sites.txt” and “predictedsites.txt”.
 3. Running time.
+
 Show the results of your evaluations graphically (e.g., Excel/Matlab/R charts). For instance, you could show the impact of ICPC on each performance metric. For this, you would compute the average performance over the 10 data sets for each value of ICPC, and plot the three averages and standard errors in a line chart.
  
