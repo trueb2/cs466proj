@@ -36,9 +36,12 @@ A benchmark is a collection of synthetic data sets. A synthetic data set is a se
 7. In a separate text file (called “sites.txt”) write down the location of the planted site in each sequence. (Use any format, your code will be reading this file later.)
 8. In a separate text file (called “motif.txt”) write down the motif that was generated in step 3. The motif should be stored in the format shown in the following example:
  
-MOTIF1 10 1 2 4 3 3 1 15 1 1
-5
-1 8 4 10 3 11 1 3 15 3
+MOTIF1 5 
+* 10 1 2 4
+* 3 3 1 15
+* 1 1 5 1
+* 8 4 10 3
+* 11 1 3 15
 
 (This motif has name “MOTIF1”, length 5, and each row after the header is one column of the PWM, with the four numbers representing (unnormalized) frequencies of the nucleotides A,C,G,T respectively in positions 1, 2, ... 5.)
 
